@@ -1,0 +1,123 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>订单信息列表</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+            /* 添加样式，将注销按钮放置到右上角 */
+        .logout-button {
+            float: right; /* 使用 float 来右浮动按钮 */
+            margin: 10px; /* 添加一些外边距，调整按钮的位置 */
+        }
+    </style>
+</head>
+<body>
+    <h1>订单信息列表</h1>
+     <style>
+        /* 添加样式，将分页导航放置在右下方 */
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+    <!-- 添加一个按钮用于跳转到添加订单页面 -->
+    <a href="{{ url_for('add_order_page') }}">添加订单</a>
+    <!-- 在模板中显示删除订单的提示信息 -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <table>
+        <tr>
+            <th>新郎姓名</th>
+            <th>新娘姓名</th>
+            <th>新郎电话</th>
+            <th>新娘电话</th>
+            <th>婚纱照价格</th>
+            <th>跟拍价格</th>
+            <th>跟妆价格</th>
+            <th>摄像价格</th>
+            <th>租礼服价格</th>
+            <th>婚庆价格</th>
+            <th>总价格</th>
+            <th>订单时间</th>
+            <th>拍摄时间</th>
+            <th>选片时间</th>
+            <th>看精修时间</th>
+            <th>订单状态</th>
+            <th>销售顾问</th>
+            <th>摄影师</th>
+            <th>化妆师</th>
+            <th>创建人</th>
+            <th>创建时间</th>
+            <th>操作</th> <!-- 添加一个新的表头用于显示操作按钮 -->
+        </tr>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.groom_name }}</td>
+            <td>{{ order.bride_name }}</td>
+            <td>{{ order.groom_phone }}</td>
+            <td>{{ order.bride_phone }}</td>
+            <td>{{ order.wedding_dress_price }}</td>
+            <td>{{ order.photography_price }}</td>
+            <td>{{ order.makeup_price }}</td>
+            <td>{{ order.videography_price }}</td>
+            <td>{{ order.dress_rental_price }}</td>
+            <td>{{ order.wedding_celebration_price }}</td>
+            <td>{{ order.total_price }}</td>
+            <td>{{ order.order_time }}</td>
+            <td>{{ order.shoot_time }}</td>
+            <td>{{ order.choosepicture_time }}</td>
+            <td>{{ order.confirmpicture_time }}</td>
+            <td>{{ order.order_status }}</td>
+            <td>{{ order.sales_consultant }}</td>
+            <td>{{ order.photographer }}</td>
+            <td>{{ order.makeup_artist }}</td>
+            <td>{{ order.created_by }}</td>
+            <td>{{ order.created_time }}</td>
+            <td>
+                <!-- 添加编辑按钮，点击按钮时跳转到 /edit_order_page 路由，并传递订单ID -->
+                <a href="{{ url_for('edit_order_page', order_id=order.orderid) }}">编辑</a>
+                <!-- 添加删除按钮，点击按钮时跳转到 /delete_order 路由，并传递订单ID -->
+                <a href="{{ url_for('delete_order', order_id=order.orderid) }}"onclick="return confirmDelete();">删除</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <!-- 添加分页导航 -->
+    <div class="pagination">
+        {% if orders.has_prev %}
+            <a href="{{ url_for('index', page=orders.prev_num) }}">上一页</a>
+        {% endif %}
+        <span class="current-page">{{ orders.page }}</span>
+        /
+        <span class="total-pages">{{ orders.pages }}</span>
+        {% if orders.has_next %}
+            <a href="{{ url_for('index', page=orders.next_num) }}">下一页</a>
+        {% endif %}
+    </div>
+<script>
+    function confirmDelete() {
+        return confirm("确认删除订单吗？");
+    }
+</script>
+</body>
+</html>

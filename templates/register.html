@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>用户注册</title>
+</head>
+<body>
+    <h1>用户注册</h1>
+    {% if error %}
+    <p style="color: red;">{{ error }}</p>
+    {% endif %}
+    <form action="/register" method="post">
+        <label for="username">用户名:</label>
+        <input type="text" id="username" name="username" placeholder="请输入用户名" required><br>
+        <label for="password">密码:</label>
+        <input type="password" id="password" name="password" placeholder="请输入密码" required><br>
+        <label for="position">岗位:</label>
+        <input type="text" id="position" name="position" placeholder="请输入工作岗位" required><br>
+        <label for="phone">电话:</label>
+        <input type="text" id="phone" name="phone" placeholder="请输入电话号码" required><br>
+        <label for="address">住址:</label>
+        <input type="text" id="address" name="address" placeholder="请输入住址" required><br>
+        <input type="submit" value="注册">
+    </form>
+<!-- 在模板中显示注册成功的提示信息 -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}" role="alert">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+</body>
+</html>

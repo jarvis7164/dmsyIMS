@@ -1,38 +1,87 @@
-<!-- edit_order.html -->
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <title>编辑订单</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        input[type="submit"] {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-<h2>编辑订单</h2>
-<form action='/edit_order/{{ order.orderid }}' method="post">
-    <input type="text" name="groom_name" placeholder="新郎姓名" value="{{ order.groom_name }}" required><br>
-    <input type="text" name="bride_name" placeholder="新娘姓名" value="{{ order.bride_name }}" required><br>
-    <input type="tel" name="groom_phone" placeholder="新郎电话" value="{{ order.groom_phone }}" required><br>
-    <input type="tel" name="bride_phone" placeholder="新娘电话" value="{{ order.bride_phone }}" required><br>
-    <input type="text" name="wedding_dress_price" placeholder="婚纱照价格" value="{{ order.wedding_dress_price }}"><br>
-    <input type="text" name="photography_price" placeholder="跟拍价格" value="{{ order.photography_price }}"><br>
-    <input type="text" name="videography_price" placeholder="摄像价格" value="{{ order.videography_price }}"><br>
-    <input type="text" name="makeup_price" placeholder="跟妆价格" value="{{ order.makeup_price }}"><br>
-    <input type="text" name="dress_rental_price" placeholder="租礼服价格" value="{{ order.dress_rental_price }}"><br>
-    <input type="text" name="wedding_celebration_price" placeholder="婚庆价格"
-           value="{{ order.wedding_celebration_price }}"><br>
-    <input type="text" name="total_price" placeholder="总价格" value="{{ order.total_price }}"><br>
-    <label for="order_time">订单时间：</label>
-    <input type="date" id="order_time" name="order_time" value="{{ order.order_time }}" required><br>
-    <label for="shoot_time">拍摄时间：</label>
-    <input type="date" id="shoot_time" name="shoot_time" value="{{ order.shoot_time }}" required><br>
-<!--    <label for="order_time">选片时间：</label>-->
-<!--    <input type="date" id="choosepicture_time" name="choosepicture_time" value="{{ order.choosepicture_time }}"><br>-->
-<!--    <label for="order_time">看精修时间：</label>-->
-<!--    <input type="date" id="confirmpicture_time" name="confirmpicture_time" value="{{ order.confirmpicture_time }}"><br>-->
-<!--    <input type="tel" name="order_status" placeholder="订单状态" required><br>-->
-    <input type="text" name="sales_consultant" placeholder="销售顾问" value="{{ order.sales_consultant }}" required><br>
-    <input type="text" name="photographer" placeholder="摄影师" value="{{ order.photographer }}" required><br>
-    <input type="text" name="makeup_artist" placeholder="化妆师" value="{{ order.makeup_artist }}" required><br>
-    <input type="submit" value="保存">
-</form>
-
+    <h2>编辑订单</h2>
+    <form action='/edit_order/{{ order.orderid }}' method="post">
+        <input type="text" name="groom_name" placeholder="新郎姓名" value="{{ order.groom_name }}" required>
+        <input type="text" name="bride_name" placeholder="新娘姓名" value="{{ order.bride_name }}" required>
+        <input type="tel" name="groom_phone" placeholder="新郎电话" value="{{ order.groom_phone }}" required>
+        <input type="tel" name="bride_phone" placeholder="新娘电话" value="{{ order.bride_phone }}" required>
+        <input type="text" name="wedding_dress_price" placeholder="婚纱照价格" value="{{ order.wedding_dress_price }}">
+        <input type="text" name="photography_price" placeholder="跟拍价格" value="{{ order.photography_price }}">
+        <input type="text" name="videography_price" placeholder="摄像价格" value="{{ order.videography_price }}">
+        <input type="text" name="makeup_price" placeholder="跟妆价格" value="{{ order.makeup_price }}">
+        <input type="text" name="dress_rental_price" placeholder="租礼服价格" value="{{ order.dress_rental_price }}">
+        <input type="text" name="wedding_celebration_price" placeholder="婚庆价格" value="{{ order.wedding_celebration_price }}">
+        <input type="text" name="total_price" placeholder="总价格" value="{{ order.total_price }}" readonly>
+        <label for="order_time">订单时间：</label>
+        <input type="date" id="order_time" name="order_time" value="{{ order.order_time }}" required>
+        <label for="shoot_time">拍摄时间：</label>
+        <input type="date" id="shoot_time" name="shoot_time" value="{{ order.shoot_time }}" required>
+        <label for="choosepicture_time">选片时间：</label>
+        <input type="date" id="choosepicture_time" name="choosepicture_time" value="{{ order.choosepicture_time }}">
+        <label for="confirmpicture_time">看精修时间：</label>
+        <input type="date" id="confirmpicture_time" name="confirmpicture_time" value="{{ order.confirmpicture_time }}">
+        <input type="text" name="order_status" placeholder="订单状态" value="{{ order.order_status }}" required>
+        <input type="text" name="sales_consultant" placeholder="销售顾问" value="{{ order.sales_consultant }}" required>
+        <input type="text" name="photographer" placeholder="摄影师" value="{{ order.photographer }}" required>
+        <input type="text" name="makeup_artist" placeholder="化妆师" value="{{ order.makeup_artist }}" required>
+        <input type="submit" value="保存">
+    </form>
 </body>
 </html>

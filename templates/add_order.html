@@ -1,52 +1,99 @@
-<!-- add_order.html -->
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <title>添加订单</title>
     <style>
-     /* 添加样式，定义弹框外观 */
-    .modal {
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 5px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
 
-    .modal p {
-        margin: 0;
-    }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
 
-    .modal .close-btn {
-        cursor: pointer;
-        position: absolute;
-        top: 10px;
-        right: 10px;
-    }
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        input[type="submit"] {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        /* 添加样式，定义弹框外观 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal p {
+            margin: 0;
+        }
+
+        .modal .close-btn {
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
     </style>
     <script>
         function calculateTotalPrice() {
             // 获取各价格字段的值
             var weddingDressPrice = parseFloat(document.getElementsByName('wedding_dress_price')[0].value) || 0;
             var photographyPrice = parseFloat(document.getElementsByName('photography_price')[0].value) || 0;
-            var videography_price = parseFloat(document.getElementsByName('videography_price')[0].value) || 0;
+            var videographyPrice = parseFloat(document.getElementsByName('videography_price')[0].value) || 0;
             var makeupPrice = parseFloat(document.getElementsByName('makeup_price')[0].value) || 0;
             var dressRentalPrice = parseFloat(document.getElementsByName('dress_rental_price')[0].value) || 0;
             var weddingCelebrationPrice = parseFloat(document.getElementsByName('wedding_celebration_price')[0].value) || 0;
 
             // 计算总价格并更新总价格字段的值
-            var totalPrice = weddingDressPrice + photographyPrice + videography_price + makeupPrice + dressRentalPrice + weddingCelebrationPrice;
+            var totalPrice = weddingDressPrice + photographyPrice + videographyPrice + makeupPrice + dressRentalPrice + weddingCelebrationPrice;
             document.getElementsByName('total_price')[0].value = totalPrice.toFixed(2);
         }
 
-    </script>
-    <script>
-            async function handleSubmit(event) {
+        async function handleSubmit(event) {
             event.preventDefault(); // 阻止表单的默认提交行为
 
             // 获取表单数据
@@ -77,32 +124,30 @@
     <!-- 添加订单表单 -->
     <h2>添加订单</h2>
     <form id="addOrderForm" onsubmit="return handleSubmit(event)">
-        <input type="text" name="groom_name" placeholder="新郎姓名" required><br>
-        <input type="text" name="bride_name" placeholder="新娘姓名" required><br>
-        <input type="tel" name="groom_phone" placeholder="新郎电话" required><br>
-        <input type="tel" name="bride_phone" placeholder="新娘电话" required><br>
-        <input type="text" name="wedding_dress_price" placeholder="婚纱照价格" oninput="calculateTotalPrice()"><br>
-        <input type="text" name="photography_price" placeholder="跟拍价格" oninput="calculateTotalPrice()"><br>
-        <input type="text" name="videography_price" placeholder="摄像价格" oninput="calculateTotalPrice()"><br>
-        <input type="text" name="makeup_price" placeholder="跟妆价格" oninput="calculateTotalPrice()"><br>
-        <input type="text" name="dress_rental_price" placeholder="租礼服价格" oninput="calculateTotalPrice()"><br>
-        <input type="text" name="wedding_celebration_price" placeholder="婚庆价格" oninput="calculateTotalPrice()"><br>
-        <input type="text" name="total_price" placeholder="总价格"><br>
+        <input type="text" name="groom_name" placeholder="新郎姓名" required>
+        <input type="text" name="bride_name" placeholder="新娘姓名" required>
+        <input type="tel" name="groom_phone" placeholder="新郎电话" required>
+        <input type="tel" name="bride_phone" placeholder="新娘电话" required>
+        <input type="text" name="wedding_dress_price" placeholder="婚纱照价格" oninput="calculateTotalPrice()">
+        <input type="text" name="photography_price" placeholder="跟拍价格" oninput="calculateTotalPrice()">
+        <input type="text" name="videography_price" placeholder="摄像价格" oninput="calculateTotalPrice()">
+        <input type="text" name="makeup_price" placeholder="跟妆价格" oninput="calculateTotalPrice()">
+        <input type="text" name="dress_rental_price" placeholder="租礼服价格" oninput="calculateTotalPrice()">
+        <input type="text" name="wedding_celebration_price" placeholder="婚庆价格" oninput="calculateTotalPrice()">
+        <input type="text" name="total_price" placeholder="总价格" readonly>
         <label for="order_time">订单时间：</label>
-        <input type="date" id="order_time" name="order_time" required><br>
+        <input type="date" id="order_time" name="order_time" required>
         <label for="shoot_time">拍摄时间：</label>
-        <input type="date" id="shoot_time" name="shoot_time" required><br>
+        <input type="date" id="shoot_time" name="shoot_time" required>
         <label for="choosePicture_time">选片时间：</label>
-        <input type="date" id="choosePicture_time" name="choosePicture_time"><br>
+        <input type="date" id="choosePicture_time" name="choosePicture_time">
         <label for="confirmPicture_time">看精修时间：</label>
-        <input type="date" id="confirmPicture_time" name="confirmPicture_time"><br>
-        <input type="text" name="order_status" placeholder="订单状态" required><br>
-        <input type="text" name="sales_consultant" placeholder="销售顾问" required><br>
-        <input type="text" name="photographer" placeholder="摄影师" required><br>
-        <input type="text" name="makeup_artist" placeholder="化妆师" required><br>
+        <input type="date" id="confirmPicture_time" name="confirmPicture_time">
+        <input type="text" name="order_status" placeholder="订单状态" required>
+        <input type="text" name="sales_consultant" placeholder="销售顾问" required>
+        <input type="text" name="photographer" placeholder="摄影师" required>
+        <input type="text" name="makeup_artist" placeholder="化妆师" required>
         <input type="submit" value="保存">
     </form>
-
-
 </body>
 </html>

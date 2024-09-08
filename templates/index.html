@@ -1,37 +1,112 @@
-<!-- index.html -->
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <title>订单信息列表</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
         table {
             border-collapse: collapse;
             width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         th, td {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
         }
+
         th {
             background-color: #f2f2f2;
+            font-weight: bold;
         }
-            /* 添加样式，将注销按钮放置到右上角 */
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        a {
+            text-decoration: none;
+            color: #007bff;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: #0056b3;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            display: inline-block;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            margin: 0 5px;
+            border-radius: 4px;
+            background-color: #f2f2f2;
+        }
+
+        .pagination a:hover {
+            background-color: #e0e0e0;
+        }
+
+        .pagination .current-page {
+            color: #6c757d;
+            font-weight: bold;
+        }
+
         .logout-button {
-            float: right; /* 使用 float 来右浮动按钮 */
-            margin: 10px; /* 添加一些外边距，调整按钮的位置 */
+            float: right;
+            margin: 10px;
         }
-    </style>
-</head>
-<body>
-    <h1>订单信息列表</h1>
-     <style>
+
+        .logout-button a {
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-button a:hover {
+            background-color: #c82333;
+        }
+
         /* 添加样式，将分页导航放置在右下方 */
         .pagination {
             text-align: center;
             margin-top: 20px;
         }
+
+        /* 添加样式，使分页导航更美观 */
+        .pagination span.current-page,
+        .pagination span.total-pages {
+            margin: 0 5px;
+        }
     </style>
+</head>
+<body>
+    <h1>订单信息列表</h1>
     <!-- 添加一个按钮用于跳转到添加订单页面 -->
     <a href="{{ url_for('add_order_page') }}">添加订单</a>
     <!-- 在模板中显示删除订单的提示信息 -->
@@ -68,7 +143,7 @@
             <th>化妆师</th>
             <th>创建人</th>
             <th>创建时间</th>
-            <th>操作</th> <!-- 添加一个新的表头用于显示操作按钮 -->
+            <th>操作</th>
         </tr>
         {% for order in orders %}
         <tr>
@@ -97,7 +172,7 @@
                 <!-- 添加编辑按钮，点击按钮时跳转到 /edit_order_page 路由，并传递订单ID -->
                 <a href="{{ url_for('edit_order_page', order_id=order.orderid) }}">编辑</a>
                 <!-- 添加删除按钮，点击按钮时跳转到 /delete_order 路由，并传递订单ID -->
-                <a href="{{ url_for('delete_order', order_id=order.orderid) }}"onclick="return confirmDelete();">删除</a>
+                <a href="{{ url_for('delete_order', order_id=order.orderid) }}" onclick="return confirmDelete();">删除</a>
             </td>
         </tr>
         {% endfor %}

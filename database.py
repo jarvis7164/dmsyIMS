@@ -13,6 +13,7 @@ db = SQLAlchemy()
 
 # 订单信息表
 class Order(db.Model):
+    __tablename__ = 'order'
     # 定义您的数据模型
     orderid = db.Column(db.Integer, primary_key=True)
     groom_name = db.Column(db.String(20))
@@ -40,9 +41,10 @@ class Order(db.Model):
 
 # 员工信息表
 class User(db.Model):
+    __tablename__ = 'user'
     userid = db.Column(db.String(20), primary_key=True)
     username = db.Column(db.String(20), nullable=False)
-    password = db.Column(db.String(20), nullable=False)
+    password = db.Column(db.String(256), nullable=False)  # 增加长度以存储哈希密码
     position = db.Column(db.String(50))  # 岗位
     phone = db.Column(db.String(16))
     address = db.Column(db.String(100))  # 地址
@@ -52,3 +54,47 @@ class User(db.Model):
     guaranteed_salary = db.Column(db.Float)  # 保底薪资
     created_by = db.Column(db.String(20))  # 创建人，默认为 'admin'
     created_time = db.Column(db.DateTime, default=datetime.utcnow().replace(microsecond=0))  # 创建时间，默认为当前时间
+
+    # 用户与角色的多对多关系
+    roles = db.relationship('Role', secondary='user_role', backref=db.backref('users', lazy='dynamic'))
+
+
+# 角色表
+class Role(db.Model):
+    __tablename__ = 'role'
+    id = db.Column(db.Integer, primary_key=True)
+    role_name = db.Column(db.String(50), unique=True, nullable=False)  # 角色名称
+    role_code = db.Column(db.String(50), unique=True, nullable=False)  # 角色编码
+    description = db.Column(db.String(200))  # 角色描述
+    created_time = db.Column(db.DateTime, default=datetime.utcnow().replace(microsecond=0))
+
+    # 角色与菜单的多对多关系
+    menus = db.relationship('Menu', secondary='role_menu', backref=db.backref('roles', lazy='dynamic'))
+
+
+# 菜单表
+class Menu(db.Model):
+    __tablename__ = 'menu'
+    id = db.Column(db.Integer, primary_key=True)
+    menu_name = db.Column(db.String(50), nullable=False)  # 菜单名称
+    menu_code = db.Column(db.String(50), unique=True, nullable=False)  # 菜单编码
+    menu_url = db.Column(db.String(100))  # 菜单 URL
+    parent_id = db.Column(db.Integer, default=0)  # 父菜单 ID，0 表示一级菜单
+    icon = db.Column(db.String(50))  # 菜单图标
+    sort_order = db.Column(db.Integer, default=0)  # 排序顺序
+    is_visible = db.Column(db.Boolean, default=True)  # 是否可见
+    created_time = db.Column(db.DateTime, default=datetime.utcnow().replace(microsecond=0))
+
+
+# 角色 - 菜单关联表
+role_menu = db.Table('role_menu',
+    db.Column('role_id', db.Integer, db.ForeignKey('role.id'), primary_key=True),
+    db.Column('menu_id', db.Integer, db.ForeignKey('menu.id'), primary_key=True)
+)
+
+
+# 用户 - 角色关联表
+user_role = db.Table('user_role',
+    db.Column('user_id', db.String(20), db.ForeignKey('user.userid'), primary_key=True),
+    db.Column('role_id', db.Integer, db.ForeignKey('role.id'), primary_key=True)
+)

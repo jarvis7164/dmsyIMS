@@ -57,6 +57,9 @@
 <body>
     <div class="login-form">
         <h1>用户登录</h1>
+        {% if error %}
+        <p style="color: red; text-align: center;">{{ error }}</p>
+        {% endif %}
         <form action="/login" method="post">
             <label for="userid">用户ID：</label>
             <input type="text" id="userid" name="userid" required>

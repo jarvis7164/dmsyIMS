@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>角色管理 - 大麦摄影管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        /* 左侧导航栏样式 - 固定 */
+        .sidebar {
+            width: 220px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 20px;
+            border-bottom: 1px solid #34495e;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            color: #ecf0f1;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin: 5px 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: #bdc3c7;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background-color: #34495e;
+            color: white;
+        }
+
+        .sidebar-menu a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 220px;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* 顶部栏 */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            left: 220px;
+            right: 0;
+            top: 0;
+            padding: 15px 20px;
+            background-color: white;
+            border-bottom: 1px solid #ddd;
+            z-index: 99;
+        }
+
+        .top-bar h1 {
+            font-size: 24px;
+            color: #333;
+            margin: 0;
+        }
+
+        .logout-button a {
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-button a:hover {
+            background-color: #c82333;
+        }
+
+        .content-card {
+            margin-top: 70px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        /* 表格样式 */
+        .table-wrapper {
+            position: relative;
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background-color: white;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .action-btn {
+            margin: 0 5px;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            font-size: 13px;
+        }
+
+        .edit-btn {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background-color: #138496;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        .assign-btn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .assign-btn:hover {
+            background-color: #218838;
+        }
+
+        /* 消息提示 */
+        .alert {
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 弹窗样式 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid #e9ecef;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px 12px 0 0;
+            color: white;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 16px 24px;
+            border-top: 1px solid #e9ecef;
+            background-color: #f8f9fa;
+            flex-shrink: 0;
+            position: sticky;
+            bottom: 0;
+        }
+
+        .modal-btn {
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .modal-btn-secondary {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        .modal-btn-secondary:hover {
+            background-color: #dee2e6;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* 菜单权限选择 */
+        .menu-permissions {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            padding: 10px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .menu-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .menu-item label {
+            cursor: pointer;
+            margin: 0;
+            font-weight: normal;
+        }
+
+        /* 分页 */
+        .pagination-fixed {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            z-index: 98;
+        }
+
+        .pagination {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .pagination a {
+            display: inline-block;
+            padding: 8px 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f2f2f2;
+            transition: background-color 0.3s ease;
+            font-size: 14px;
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .pagination a:hover {
+            background-color: #e0e0e0;
+        }
+
+        .pagination .current-page {
+            padding: 8px 14px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 左侧导航栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>大麦摄影管理系统</h2>
+        </div>
+        <ul class="sidebar-menu" id="sidebarMenu">
+            <!-- 动态加载菜单 -->
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 顶部栏 -->
+        <div class="top-bar">
+            <h1>角色管理</h1>
+            <div class="logout-button">
+                <a href="{{ url_for('logout') }}">退出登录</a>
+            </div>
+        </div>
+
+        <!-- 内容卡片 -->
+        <div class="content-card">
+            <!-- 添加角色按钮 -->
+            <button onclick="openAddModal()" class="add-btn">+ 添加角色</button>
+
+            <!-- 消息提示 -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- 表格 -->
+            <div class="table-wrapper">
+                <table>
+                    <tr>
+                        <th>ID</th>
+                        <th>角色名称</th>
+                        <th>角色编码</th>
+                        <th>描述</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                    {% for role in roles %}
+                    <tr>
+                        <td>{{ role.id }}</td>
+                        <td>{{ role.role_name }}</td>
+                        <td>{{ role.role_code }}</td>
+                        <td>{{ role.description or '-' }}</td>
+                        <td>{{ role.created_time.strftime('%Y-%m-%d %H:%M') if role.created_time else '-' }}</td>
+                        <td>
+                            <button onclick="openEditModal({{ role.id }})" class="action-btn edit-btn">编辑</button>
+                            {% if role.role_code != 'ADMIN' %}
+                            <button onclick="deleteRole({{ role.id }})" class="action-btn delete-btn">删除</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+            <!-- 分页 -->
+            <div class="pagination-fixed">
+                <div class="pagination">
+                    {% if roles.has_prev %}
+                        <a href="{{ url_for('role_management', page=roles.prev_num) }}">上一页</a>
+                    {% endif %}
+                    <span class="current-page">{{ roles.page }}</span>
+                    / {{ roles.pages }}
+                    {% if roles.has_next %}
+                        <a href="{{ url_for('role_management', page=roles.next_num) }}">下一页</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑角色弹窗 -->
+    <div class="modal-overlay" id="roleModal" onclick="closeModal(event)">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modalTitle">添加角色</h3>
+                <button class="modal-close" onclick="closeRoleModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="roleForm">
+                    <input type="hidden" id="role_id">
+                    <div class="form-group">
+                        <label>角色名称 <span style="color:red">*</span></label>
+                        <input type="text" id="role_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>角色编码 <span style="color:red">*</span></label>
+                        <input type="text" id="role_code" required>
+                    </div>
+                    <div class="form-group">
+                        <label>描述</label>
+                        <textarea id="description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>菜单权限</label>
+                        <div class="menu-permissions" id="menuPermissions">
+                            <!-- 动态加载菜单 -->
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn modal-btn-secondary" onclick="closeRoleModal()">取消</button>
+                <button type="button" class="modal-btn modal-btn-primary" onclick="saveRole()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allMenus = [];
+
+        // 加载用户菜单
+        async function loadUserMenus() {
+            try {
+                const response = await fetch('/get_menus');
+                const data = await response.json();
+                if (data.success) {
+                    allMenus = data.menus;
+                    renderSidebarMenu(data.menus);
+                }
+            } catch (error) {
+                console.error('加载菜单失败:', error);
+            }
+        }
+
+        // 渲染侧边栏菜单
+        function renderSidebarMenu(menus) {
+            const sidebarMenu = document.getElementById('sidebarMenu');
+            const currentPage = window.location.pathname;
+
+            let menuHtml = '';
+            menus.forEach(menu => {
+                const isActive = menu.menu_url === currentPage ? 'active' : '';
+                menuHtml += `
+                    <li>
+                        <a href="${menu.menu_url}" class="${isActive}">
+                            <i>${menu.icon || '📄'}</i>${menu.menu_name}
+                        </a>
+                    </li>
+                `;
+            });
+            sidebarMenu.innerHTML = menuHtml;
+        }
+
+        // 加载所有菜单到权限选择
+        async function loadMenusForPermission() {
+            try {
+                const response = await fetch('/get_menus');
+                const data = await response.json();
+                if (data.success) {
+                    renderMenuPermissions(data.menus);
+                }
+            } catch (error) {
+                console.error('加载菜单失败:', error);
+            }
+        }
+
+        // 渲染菜单权限选择
+        function renderMenuPermissions(menus) {
+            const container = document.getElementById('menuPermissions');
+            const selectedMenuIds = document.getElementById('roleForm').dataset.selectedMenus ?
+                JSON.parse(document.getElementById('roleForm').dataset.selectedMenus) : [];
+
+            let html = '';
+            menus.forEach(menu => {
+                const checked = selectedMenuIds.includes(menu.id) ? 'checked' : '';
+                html += `
+                    <div class="menu-item">
+                        <input type="checkbox" id="menu_${menu.id}" value="${menu.id}" ${checked}>
+                        <label for="menu_${menu.id}">${menu.icon || '📄'} ${menu.menu_name}</label>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // 打开添加弹窗
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = '添加角色';
+            document.getElementById('roleForm').reset();
+            document.getElementById('role_id').value = '';
+            document.getElementById('roleForm').dataset.selectedMenus = '[]';
+            loadMenusForPermission();
+            document.getElementById('roleModal').classList.add('active');
+        }
+
+        // 打开编辑弹窗
+        async function openEditModal(roleId) {
+            document.getElementById('modalTitle').textContent = '编辑角色';
+
+            try {
+                const response = await fetch('/get_role/' + roleId);
+                const data = await response.json();
+
+                if (data.success) {
+                    const role = data.role;
+                    document.getElementById('role_id').value = role.id;
+                    document.getElementById('role_name').value = role.role_name;
+                    document.getElementById('role_code').value = role.role_code;
+                    document.getElementById('description').value = role.description || '';
+                    document.getElementById('roleForm').dataset.selectedMenus = JSON.stringify(role.menu_ids);
+                    loadMenusForPermission();
+                    document.getElementById('roleModal').classList.add('active');
+                }
+            } catch (error) {
+                alert('获取角色数据失败:' + error.message);
+            }
+        }
+
+        // 关闭弹窗
+        function closeRoleModal() {
+            document.getElementById('roleModal').classList.remove('active');
+        }
+
+        // 点击遮罩层关闭
+        function closeModal(event) {
+            if (event.target === document.getElementById('roleModal')) {
+                closeRoleModal();
+            }
+        }
+
+        // 保存角色
+        async function saveRole() {
+            const roleId = document.getElementById('role_id').value;
+            const roleName = document.getElementById('role_name').value;
+            const roleCode = document.getElementById('role_code').value;
+            const description = document.getElementById('description').value;
+
+            // 获取选中的菜单
+            const menuIds = [];
+            document.querySelectorAll('#menuPermissions input[type="checkbox"]:checked').forEach(cb => {
+                menuIds.push(parseInt(cb.value));
+            });
+
+            if (!roleName || !roleCode) {
+                alert('角色名称和编码不能为空！');
+                return;
+            }
+
+            const url = roleId ? '/update_role/' + roleId : '/add_role';
+            const method = 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        role_name: roleName,
+                        role_code: roleCode,
+                        description: description,
+                        menu_ids: menuIds
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    closeRoleModal();
+                    window.location.reload();
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                alert('保存失败:' + error.message);
+            }
+        }
+
+        // 删除角色
+        async function deleteRole(roleId) {
+            if (!confirm('确认删除此角色吗？')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/delete_role/' + roleId, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                alert('删除失败:' + error.message);
+            }
+        }
+
+        // ESC 关闭弹窗
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeRoleModal();
+            }
+        });
+
+        // 页面加载时加载菜单
+        loadUserMenus();
+    </script>
+</body>
+</html>

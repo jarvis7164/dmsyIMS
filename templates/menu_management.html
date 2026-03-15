@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>菜单管理 - 大麦摄影管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 220px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 20px;
+            border-bottom: 1px solid #34495e;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            color: #ecf0f1;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin: 5px 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: #bdc3c7;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background-color: #34495e;
+            color: white;
+        }
+
+        .sidebar-menu a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 220px;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            left: 220px;
+            right: 0;
+            top: 0;
+            padding: 15px 20px;
+            background-color: white;
+            border-bottom: 1px solid #ddd;
+            z-index: 99;
+        }
+
+        .top-bar h1 {
+            font-size: 24px;
+            color: #333;
+            margin: 0;
+        }
+
+        .logout-button a {
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-button a:hover {
+            background-color: #c82333;
+        }
+
+        .content-card {
+            margin-top: 70px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .table-wrapper {
+            position: relative;
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background-color: white;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .action-btn {
+            margin: 0 5px;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            font-size: 13px;
+        }
+
+        .edit-btn {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background-color: #138496;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 弹窗样式 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid #e9ecef;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 12px 12px 0 0;
+            color: white;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 16px 24px;
+            border-top: 1px solid #e9ecef;
+            background-color: #f8f9fa;
+            flex-shrink: 0;
+            position: sticky;
+            bottom: 0;
+        }
+
+        .modal-btn {
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn-primary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(240, 147, 251, 0.4);
+        }
+
+        .modal-btn-secondary {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        .modal-btn-secondary:hover {
+            background-color: #dee2e6;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #f093fb;
+            box-shadow: 0 0 0 3px rgba(240, 147, 251, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 左侧导航栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>大麦摄影管理系统</h2>
+        </div>
+        <ul class="sidebar-menu" id="sidebarMenu">
+            <!-- 动态加载菜单 -->
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 顶部栏 -->
+        <div class="top-bar">
+            <h1>菜单管理</h1>
+            <div class="logout-button">
+                <a href="{{ url_for('logout') }}">退出登录</a>
+            </div>
+        </div>
+
+        <!-- 内容卡片 -->
+        <div class="content-card">
+            <!-- 添加菜单按钮 -->
+            <button onclick="openAddModal()" class="add-btn">+ 添加菜单</button>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- 表格 -->
+            <div class="table-wrapper">
+                <table>
+                    <tr>
+                        <th>ID</th>
+                        <th>菜单名称</th>
+                        <th>菜单编码</th>
+                        <th>URL</th>
+                        <th>父菜单</th>
+                        <th>图标</th>
+                        <th>排序</th>
+                        <th>操作</th>
+                    </tr>
+                    {% for menu in menus %}
+                    <tr>
+                        <td>{{ menu.id }}</td>
+                        <td>{{ menu.icon or '📄' }} {{ menu.menu_name }}</td>
+                        <td>{{ menu.menu_code }}</td>
+                        <td>{{ menu.menu_url or '-' }}</td>
+                        <td>{{ menu.parent_id if menu.parent_id > 0 else '一级菜单' }}</td>
+                        <td>{{ menu.icon or '-' }}</td>
+                        <td>{{ menu.sort_order }}</td>
+                        <td>
+                            <button onclick="openEditModal({{ menu.id }})" class="action-btn edit-btn">编辑</button>
+                            <button onclick="deleteMenu({{ menu.id }})" class="action-btn delete-btn">删除</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑菜单弹窗 -->
+    <div class="modal-overlay" id="menuModal" onclick="closeModal(event)">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modalTitle">添加菜单</h3>
+                <button class="modal-close" onclick="closeMenuModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="menuForm">
+                    <input type="hidden" id="menu_id">
+                    <div class="form-group">
+                        <label>菜单名称 <span style="color:red">*</span></label>
+                        <input type="text" id="menu_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>菜单编码 <span style="color:red">*</span></label>
+                        <input type="text" id="menu_code" required>
+                    </div>
+                    <div class="form-group">
+                        <label>URL 地址</label>
+                        <input type="text" id="menu_url" placeholder="例如：/index">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>父菜单</label>
+                            <select id="parent_id">
+                                <option value="0">一级菜单</option>
+                                {% for menu in menus %}
+                                <option value="{{ menu.id }}">{{ menu.menu_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>排序</label>
+                            <input type="number" id="sort_order" value="0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>图标</label>
+                        <input type="text" id="icon" placeholder="例如：📋">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn modal-btn-secondary" onclick="closeMenuModal()">取消</button>
+                <button type="button" class="modal-btn modal-btn-primary" onclick="saveMenu()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 加载侧边栏菜单
+        async function loadUserMenus() {
+            try {
+                const response = await fetch('/get_menus');
+                const data = await response.json();
+                if (data.success) {
+                    renderSidebarMenu(data.menus);
+                }
+            } catch (error) {
+                console.error('加载菜单失败:', error);
+            }
+        }
+
+        function renderSidebarMenu(menus) {
+            const sidebarMenu = document.getElementById('sidebarMenu');
+            const currentPage = window.location.pathname;
+            let menuHtml = '';
+            menus.forEach(menu => {
+                const isActive = menu.menu_url === currentPage ? 'active' : '';
+                menuHtml += `
+                    <li>
+                        <a href="${menu.menu_url}" class="${isActive}">
+                            <i>${menu.icon || '📄'}</i>${menu.menu_name}
+                        </a>
+                    </li>
+                `;
+            });
+            sidebarMenu.innerHTML = menuHtml;
+        }
+
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = '添加菜单';
+            document.getElementById('menuForm').reset();
+            document.getElementById('menu_id').value = '';
+            document.getElementById('menuModal').classList.add('active');
+        }
+
+        function openEditModal(menuId) {
+            document.getElementById('modalTitle').textContent = '编辑菜单';
+            // 简单实现，实际应该先获取菜单详情
+            alert('编辑功能需要获取菜单详情，此处简化处理');
+            document.getElementById('menuModal').classList.add('active');
+        }
+
+        function closeMenuModal() {
+            document.getElementById('menuModal').classList.remove('active');
+        }
+
+        function closeModal(event) {
+            if (event.target === document.getElementById('menuModal')) {
+                closeMenuModal();
+            }
+        }
+
+        async function saveMenu() {
+            const menuId = document.getElementById('menu_id').value;
+            const menuData = {
+                menu_name: document.getElementById('menu_name').value,
+                menu_code: document.getElementById('menu_code').value,
+                menu_url: document.getElementById('menu_url').value,
+                parent_id: parseInt(document.getElementById('parent_id').value),
+                sort_order: parseInt(document.getElementById('sort_order').value),
+                icon: document.getElementById('icon').value
+            };
+
+            if (!menuData.menu_name || !menuData.menu_code) {
+                alert('菜单名称和编码不能为空！');
+                return;
+            }
+
+            const url = menuId ? '/update_menu/' + menuId : '/add_menu';
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(menuData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    closeMenuModal();
+                    window.location.reload();
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                alert('保存失败:' + error.message);
+            }
+        }
+
+        async function deleteMenu(menuId) {
+            if (!confirm('确认删除此菜单吗？')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/delete_menu/' + menuId, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                alert('删除失败:' + error.message);
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeMenuModal();
+            }
+        });
+
+        loadUserMenus();
+    </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 import os
 import re
 from flask import Flask, render_template, request, redirect, session, url_for, flash, jsonify
-from database import db, Order, User, Role, Menu, user_role, role_menu
+from database import db, Order, User, Role, Menu, user_role, role_menu, Salary
 from sqlalchemy import desc
 from datetime import datetime
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -24,11 +24,11 @@ def validate_phone(phone):
     return bool(re.match(pattern, phone))
 
 def validate_price(price_str):
-    """验证价格字段"""
+    """验证价格字段为整数"""
     if not price_str:
-        return True, 0.0
+        return True, 0
     try:
-        price = float(price_str)
+        price = int(price_str)
         if price < 0:
             return False, None
         return True, price
@@ -95,8 +95,10 @@ def add_order():
         makeup_price = request.form['makeup_price']
         dress_rental_price = request.form['dress_rental_price']
         wedding_celebration_price = request.form['wedding_celebration_price']
+        extra_film_price = request.form.get('extra_film_price', 0)
         total_price = request.form['total_price']
         order_time_str = request.form['order_time']
+        remark = request.form.get('remark', '')
 
         # 验证价格字段
         valid, wedding_dress_price = validate_price(wedding_dress_price)
@@ -117,6 +119,9 @@ def add_order():
         valid, wedding_celebration_price = validate_price(wedding_celebration_price)
         if not valid:
             return jsonify({'success': False, 'message': '婚庆价格格式错误！'}), 400
+        valid, extra_film_price = validate_price(extra_film_price)
+        if not valid:
+            return jsonify({'success': False, 'message': '加片金额格式错误！'}), 400
         valid, total_price = validate_price(total_price)
         if not valid:
             return jsonify({'success': False, 'message': '总价格格式错误！'}), 400
@@ -146,6 +151,7 @@ def add_order():
             makeup_price=makeup_price,
             dress_rental_price=dress_rental_price,
             wedding_celebration_price=wedding_celebration_price,
+            extra_film_price=extra_film_price,
             total_price=total_price,
             order_time=order_time,
             shoot_time=shoot_time,
@@ -155,6 +161,7 @@ def add_order():
             sales_consultant=sales_consultant,
             photographer=photographer,
             makeup_artist=makeup_artist,
+            remark=remark[:300],  # 限制备注长度为 300 字
             created_by=session['userid']
         )
         try:
@@ -186,13 +193,93 @@ def logout():
 @app.route('/')
 def index():
     if 'userid' in session:
+        from datetime import datetime, timedelta
+
         # 获取当前页码参数
         page = request.args.get('page', 1, type=int)
         # 每页显示的订单数量
         per_page = 10
-        # 查询订单数据，并按照创建时间倒序排序
-        orders = Order.query.order_by(desc(Order.created_time)).paginate(page=page, per_page=per_page)
-        return render_template('index.html', orders=orders, format_datetime=format_datetime)
+
+        # 获取查询参数
+        name_keyword = request.args.get('name_keyword', '')
+        shoot_start = request.args.get('shoot_start', '')
+        shoot_end = request.args.get('shoot_end', '')
+        order_start = request.args.get('order_start', '')
+        order_end = request.args.get('order_end', '')
+        photo_start = request.args.get('photo_start', '')
+        photo_end = request.args.get('photo_end', '')
+        makeup_start = request.args.get('makeup_start', '')
+        makeup_end = request.args.get('makeup_end', '')
+
+        # 构建查询
+        query = Order.query
+
+        # 新郎/新娘姓名模糊查询
+        if name_keyword:
+            query = query.filter(
+                db.or_(
+                    Order.groom_name.like(f'%{name_keyword}%'),
+                    Order.bride_name.like(f'%{name_keyword}%')
+                )
+            )
+
+        # 拍摄时间范围查询
+        if shoot_start:
+            query = query.filter(Order.shoot_time >= shoot_start)
+        if shoot_end:
+            query = query.filter(Order.shoot_time <= shoot_end + ' 23:59:59')
+
+        # 订单时间范围查询
+        if order_start:
+            query = query.filter(Order.order_time >= order_start)
+        if order_end:
+            query = query.filter(Order.order_time <= order_end + ' 23:59:59')
+
+        # 跟拍时间范围查询
+        if photo_start:
+            query = query.filter(Order.photography_price > 0)
+            # 这里没有直接的跟拍时间字段，使用拍摄时间代替
+            query = query.filter(Order.shoot_time >= photo_start)
+        if photo_end:
+            query = query.filter(Order.shoot_time <= photo_end + ' 23:59:59')
+
+        # 跟妆时间范围查询
+        if makeup_start:
+            query = query.filter(Order.makeup_price > 0)
+            # 这里没有直接的跟妆时间字段，使用拍摄时间代替
+            query = query.filter(Order.shoot_time >= makeup_start)
+        if makeup_end:
+            query = query.filter(Order.shoot_time <= makeup_end + ' 23:59:59')
+
+        # 如果没有指定任何查询条件，默认显示最近 1 个月的订单
+        has_filter = any([name_keyword, shoot_start, shoot_end, order_start, order_end,
+                         photo_start, photo_end, makeup_start, makeup_end])
+
+        if not has_filter:
+            # 默认显示拍摄时间或跟妆时间在最近 1 个月的订单
+            one_month_ago = datetime.now() - timedelta(days=30)
+            query = query.filter(
+                db.or_(
+                    Order.shoot_time >= one_month_ago,
+                    Order.makeup_price > 0  # 有跟妆服务的订单
+                )
+            )
+
+        # 按创建时间倒序排序
+        orders = query.order_by(desc(Order.created_time)).paginate(page=page, per_page=per_page)
+
+        return render_template('index.html',
+                              orders=orders,
+                              format_datetime=format_datetime,
+                              selected_name_keyword=name_keyword,
+                              selected_shoot_start=shoot_start,
+                              selected_shoot_end=shoot_end,
+                              selected_order_start=order_start,
+                              selected_order_end=order_end,
+                              selected_photo_start=photo_start,
+                              selected_photo_end=photo_end,
+                              selected_makeup_start=makeup_start,
+                              selected_makeup_end=makeup_end)
     else:
         return redirect(url_for('login'))
 
@@ -260,6 +347,7 @@ def get_order(order_id):
         'makeup_price': order.makeup_price,
         'dress_rental_price': order.dress_rental_price,
         'wedding_celebration_price': order.wedding_celebration_price,
+        'extra_film_price': order.extra_film_price,
         'total_price': order.total_price,
         'order_time': str(order.order_time) if order.order_time else '',
         'shoot_time': str(order.shoot_time) if order.shoot_time else '',
@@ -268,7 +356,10 @@ def get_order(order_id):
         'order_status': order.order_status,
         'sales_consultant': order.sales_consultant,
         'photographer': order.photographer,
-        'makeup_artist': order.makeup_artist
+        'makeup_artist': order.makeup_artist,
+        'created_by': order.created_by or '',
+        'created_time': str(order.created_time) if order.created_time else '',
+        'remark': order.remark or ''
     }
 
     return jsonify({'success': True, 'order': order_data})
@@ -289,6 +380,8 @@ def edit_order(order_id):
             order.sales_consultant = request.form['sales_consultant']
             order.photographer = request.form['photographer']
             order.makeup_artist = request.form['makeup_artist']
+            order.extra_film_price = float(request.form.get('extra_film_price', 0) or 0)
+            order.remark = request.form.get('remark', '')[:300]
 
             # 处理选片和精修时间（可选字段）
             choosePicture_time_str = request.form.get('choosePicture_time', '')
@@ -345,9 +438,15 @@ def add_user():
         # 验证并转换数值字段
         try:
             basic_salary = float(request.form.get('basic_salary', 0)) if request.form.get('basic_salary') else 0.0
+            total_rate = float(request.form.get('total_rate', 0)) if request.form.get('total_rate') else 0.0
             pre_sales_rate = float(request.form.get('pre_sales_rate', 0)) if request.form.get('pre_sales_rate') else 0.0
             post_sales_rate = float(request.form.get('post_sales_rate', 0)) if request.form.get('post_sales_rate') else 0.0
+            base_salary = float(request.form.get('base_salary', 0)) if request.form.get('base_salary') else 0.0
             guaranteed_salary = float(request.form.get('guaranteed_salary', 0)) if request.form.get('guaranteed_salary') else 0.0
+            photo_price = float(request.form.get('photo_price', 0)) if request.form.get('photo_price') else 0.0
+            makeup_subsidy = float(request.form.get('makeup_subsidy', 0)) if request.form.get('makeup_subsidy') else 0.0
+            material_subsidy = float(request.form.get('material_subsidy', 0)) if request.form.get('material_subsidy') else 0.0
+            other_subsidy = float(request.form.get('other_subsidy', 0)) if request.form.get('other_subsidy') else 0.0
         except ValueError:
             return jsonify({'success': False, 'message': '薪资字段格式不正确！'}), 400
 
@@ -365,9 +464,15 @@ def add_user():
             phone=phone,
             address=address,
             basic_salary=basic_salary,
+            total_rate=total_rate,
             pre_sales_rate=pre_sales_rate,
             post_sales_rate=post_sales_rate,
+            base_salary=base_salary,
             guaranteed_salary=guaranteed_salary,
+            photo_price=photo_price,
+            makeup_subsidy=makeup_subsidy,
+            material_subsidy=material_subsidy,
+            other_subsidy=other_subsidy,
             created_by=session['userid']
         )
         try:
@@ -461,9 +566,15 @@ def edit_user(userid):
             # 验证并转换数值字段
             try:
                 user.basic_salary = float(request.form.get('basic_salary', 0)) if request.form.get('basic_salary') else 0.0
+                user.total_rate = float(request.form.get('total_rate', 0)) if request.form.get('total_rate') else 0.0
                 user.pre_sales_rate = float(request.form.get('pre_sales_rate', 0)) if request.form.get('pre_sales_rate') else 0.0
                 user.post_sales_rate = float(request.form.get('post_sales_rate', 0)) if request.form.get('post_sales_rate') else 0.0
+                user.base_salary = float(request.form.get('base_salary', 0)) if request.form.get('base_salary') else 0.0
                 user.guaranteed_salary = float(request.form.get('guaranteed_salary', 0)) if request.form.get('guaranteed_salary') else 0.0
+                user.photo_price = float(request.form.get('photo_price', 0)) if request.form.get('photo_price') else 0.0
+                user.makeup_subsidy = float(request.form.get('makeup_subsidy', 0)) if request.form.get('makeup_subsidy') else 0.0
+                user.material_subsidy = float(request.form.get('material_subsidy', 0)) if request.form.get('material_subsidy') else 0.0
+                user.other_subsidy = float(request.form.get('other_subsidy', 0)) if request.form.get('other_subsidy') else 0.0
             except ValueError:
                 flash('薪资字段格式不正确！', 'error')
                 return redirect(url_for('edit_user_page', userid=userid))
@@ -476,37 +587,32 @@ def edit_user(userid):
     return redirect(url_for('user_management'))
 
 
-    return redirect(url_for('user_management'))
-
-
 # ==================== 角色和权限管理 ====================
 
 # 初始化菜单和角色
 def init_menus_and_roles():
     """初始化系统菜单和超级管理员角色"""
-    # 检查是否已存在菜单，避免重复初始化
-    if Menu.query.first() is not None:
-        # 菜单已存在，修复订单管理的 URL
-        order_menu = Menu.query.filter_by(menu_code='ORDER_MANAGEMENT').first()
-        if order_menu and order_menu.menu_url == '/index':
-            order_menu.menu_url = '/'
-            db.session.commit()
-        return
-
     # 定义系统菜单
     menus = [
         {'menu_name': '订单管理', 'menu_code': 'ORDER_MANAGEMENT', 'menu_url': '/', 'parent_id': 0, 'icon': '📋', 'sort_order': 1},
         {'menu_name': '用户管理', 'menu_code': 'USER_MANAGEMENT', 'menu_url': '/user_management', 'parent_id': 0, 'icon': '👥', 'sort_order': 2},
         {'menu_name': '角色管理', 'menu_code': 'ROLE_MANAGEMENT', 'menu_url': '/role_management', 'parent_id': 0, 'icon': '🛡️', 'sort_order': 3},
         {'menu_name': '菜单管理', 'menu_code': 'MENU_MANAGEMENT', 'menu_url': '/menu_management', 'parent_id': 0, 'icon': '📁', 'sort_order': 4},
+        {'menu_name': '工资管理', 'menu_code': 'SALARY_MANAGEMENT', 'menu_url': '/salary_management', 'parent_id': 0, 'icon': '💰', 'sort_order': 5},
     ]
 
-    # 添加菜单到数据库
-    menu_objects = {}
+    # 检查并添加缺失的菜单
     for menu_data in menus:
-        menu = Menu(**menu_data)
-        db.session.add(menu)
-        menu_objects[menu_data['menu_code']] = menu
+        existing_menu = Menu.query.filter_by(menu_code=menu_data['menu_code']).first()
+        if not existing_menu:
+            new_menu = Menu(**menu_data)
+            db.session.add(new_menu)
+            print(f'[OK] 添加菜单：{menu_data["menu_name"]}')
+        else:
+            # 更新可能变化的字段（如图标、URL）
+            existing_menu.menu_url = menu_data['menu_url']
+            existing_menu.icon = menu_data['icon']
+            existing_menu.sort_order = menu_data['sort_order']
 
     db.session.commit()
 
@@ -521,8 +627,10 @@ def init_menus_and_roles():
         db.session.add(admin_role)
         db.session.commit()
 
-        # 给超级管理员分配所有菜单权限
-        admin_role.menus = list(menu_objects.values())
+    # 确保超级管理员拥有所有菜单权限
+    if admin_role:
+        all_menus = Menu.query.all()
+        admin_role.menus = all_menus
         db.session.commit()
 
     # 创建普通用户角色
@@ -537,7 +645,8 @@ def init_menus_and_roles():
         db.session.commit()
 
         # 给普通用户分配部分菜单权限
-        user_role.menus = [menu_objects['ORDER_MANAGEMENT']]
+        order_menu = Menu.query.filter_by(menu_code='ORDER_MANAGEMENT').first()
+        user_role.menus = [order_menu] if order_menu else []
         db.session.commit()
 
     # 确保 admin 用户存在并分配超级管理员角色
@@ -864,6 +973,419 @@ def assign_role():
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': '分配失败：' + str(e)}), 500
+
+
+# 修改密码（用户自己修改）
+@app.route('/change_password', methods=['POST'])
+def change_password():
+    if 'userid' not in session:
+        return jsonify({'success': False, 'message': '未登录！'}), 401
+
+    data = request.get_json()
+    old_password = data.get('old_password')
+    new_password = data.get('new_password')
+
+    if not old_password or not new_password:
+        return jsonify({'success': False, 'message': '密码不能为空！'}), 400
+
+    user = db.session.get(User, session['userid'])
+    if not user:
+        return jsonify({'success': False, 'message': '用户不存在！'}), 404
+
+    # 验证旧密码
+    if not check_password_hash(user.password, old_password):
+        return jsonify({'success': False, 'message': '原密码错误！'}), 400
+
+    # 更新密码
+    user.password = generate_password_hash(new_password)
+    try:
+        db.session.commit()
+        return jsonify({'success': True, 'message': '密码修改成功！'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': '修改失败：' + str(e)}), 500
+
+
+# 重置密码（管理员重置其他用户密码）
+@app.route('/reset_password/<userid>', methods=['POST'])
+def reset_password(userid):
+    if 'userid' not in session:
+        return jsonify({'success': False, 'message': '未登录！'}), 401
+
+    # 不能重置自己的密码
+    if userid == session['userid']:
+        return jsonify({'success': False, 'message': '不能重置自己的密码！'}), 400
+
+    user = db.session.get(User, userid)
+    if not user:
+        return jsonify({'success': False, 'message': '用户不存在！'}), 404
+
+    # 重置为默认密码
+    default_password = 'dmsy123123'
+    user.password = generate_password_hash(default_password)
+
+    try:
+        db.session.commit()
+        return jsonify({'success': True, 'message': f'密码已重置为：{default_password}'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': '重置失败：' + str(e)}), 500
+
+
+# ==================== 工资管理 ====================
+
+# 工资计算页面
+@app.route('/salary_management')
+def salary_management():
+    if 'userid' not in session:
+        return redirect(url_for('login'))
+
+    if not check_permission('SALARY_MANAGEMENT'):
+        flash('没有权限访问此页面！', 'error')
+        return redirect(url_for('index'))
+
+    # 获取查询参数
+    start_date = request.args.get('start_date', '')
+    end_date = request.args.get('end_date', '')
+    position = request.args.get('position', '')
+    username = request.args.get('username', '')
+
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+
+    # 构建查询
+    query = Salary.query
+
+    # 根据日期范围筛选
+    if start_date:
+        query = query.filter(Salary.year_month >= start_date[:7])  # 取 YYYY-MM 部分
+    if end_date:
+        query = query.filter(Salary.year_month <= end_date[:7])  # 取 YYYY-MM 部分
+    if position:
+        query = query.filter(Salary.position == position)
+    if username:
+        query = query.filter(Salary.username.like(f'%{username}%'))
+
+    salaries = query.order_by(desc(Salary.created_time)).paginate(page=page, per_page=per_page)
+
+    # 获取所有员工用于选择
+    all_users = User.query.filter(User.position.isnot(None)).all()
+    positions = list(set([u.position for u in all_users if u.position]))
+
+    return render_template('salary_management.html',
+                          salaries=salaries,
+                          all_users=all_users,
+                          positions=positions,
+                          selected_start_date=start_date,
+                          selected_end_date=end_date,
+                          selected_position=position,
+                          selected_username=username)
+
+
+# 获取员工业绩数据 API
+@app.route('/get_user_performance/<userid>', methods=['GET'])
+def get_user_performance(userid):
+    if 'userid' not in session:
+        return jsonify({'success': False, 'message': '未登录！'}), 401
+
+    year_month = request.args.get('year_month', '')
+    if not year_month:
+        return jsonify({'success': False, 'message': '年月不能为空！'}), 400
+
+    user = db.session.get(User, userid)
+    if not user:
+        return jsonify({'success': False, 'message': '用户不存在！'}), 404
+
+    # 解析年月
+    year, month = year_month.split('-')
+    start_date = datetime(int(year), int(month), 1)
+    if int(month) == 12:
+        end_date = datetime(int(year) + 1, 1, 1)
+    else:
+        end_date = datetime(int(year), int(month) + 1, 1)
+
+    # 根据岗位获取业绩数据
+    position = user.position
+    performance_data = {
+        'username': user.username,
+        'position': position,
+        'base_salary_rate': user.basic_salary if user.basic_salary else 0,
+        'pre_sales': 0,
+        'post_sales': 0,
+        'referral_count': 0,
+        'makeup_count': 0,
+        'dress_count': 0,
+        'full_day_bonus': 0,
+        'social_subsidy': user.social_subsidy if hasattr(user, 'social_subsidy') else 0,
+        'housing_subsidy': user.housing_subsidy if hasattr(user, 'housing_subsidy') else 0,
+        'full_attendance_bonus': 0,
+        'other_subsidy': user.other_subsidy if hasattr(user, 'other_subsidy') else 0,
+    }
+
+    # 从订单中获取业绩数据
+    orders = Order.query.filter(
+        Order.order_time >= start_date,
+        Order.order_time < end_date
+    ).all()
+
+    for order in orders:
+        # 摄影师业绩
+        if position == '摄影师' and order.photographer == user.username:
+            performance_data['pre_sales'] += order.photography_price if order.photography_price else 0
+            performance_data['post_sales'] += order.extra_film_price if order.extra_film_price else 0
+        # 化妆师业绩
+        elif position == '化妆师' and order.makeup_artist == user.username:
+            performance_data['pre_sales'] += order.makeup_price if order.makeup_price else 0
+            if order.total_price and order.total_price > 0:
+                performance_data['referral_count'] += 0
+                performance_data['makeup_count'] += 1 if order.makeup_price > 0 else 0
+        # 销售顾问业绩
+        elif position == '销售顾问' and order.sales_consultant == user.username:
+            performance_data['pre_sales'] += order.total_price if order.total_price else 0
+        # 摄像师业绩
+        elif position == '摄像师' and order.videographer == user.username:
+            performance_data['pre_sales'] += order.videography_price if order.videography_price else 0
+
+    return jsonify({'success': True, 'performance': performance_data})
+
+
+# 计算工资 API
+@app.route('/calculate_salary', methods=['POST'])
+def calculate_salary():
+    if 'userid' not in session:
+        return jsonify({'success': False, 'message': '未登录！'}), 401
+
+    data = request.get_json()
+    userid = data.get('userid')
+    year_month = data.get('year_month')
+    work_days = int(data.get('work_days', 0))
+    month_days = int(data.get('month_days', 26))
+    referral_count = int(data.get('referral_count', 0))
+    makeup_count = int(data.get('makeup_count', 0))
+    dress_count = int(data.get('dress_count', 0))
+    full_day_bonus = float(data.get('full_day_bonus', 0))
+    social_deduction = float(data.get('social_deduction', 0))
+    other_deduction = float(data.get('other_deduction', 0))
+    remark = data.get('remark', '')
+
+    if not userid or not year_month:
+        return jsonify({'success': False, 'message': '用户 ID 和年月不能为空！'}), 400
+
+    user = db.session.get(User, userid)
+    if not user:
+        return jsonify({'success': False, 'message': '用户不存在！'}), 404
+
+    # 获取业绩数据
+    year, month = year_month.split('-')
+    start_date = datetime(int(year), int(month), 1)
+    if int(month) == 12:
+        end_date = datetime(int(year) + 1, 1, 1)
+    else:
+        end_date = datetime(int(year), int(month) + 1, 1)
+
+    orders = Order.query.filter(
+        Order.order_time >= start_date,
+        Order.order_time < end_date
+    ).all()
+
+    position = user.position
+    pre_sales = 0
+    post_sales = 0
+
+    for order in orders:
+        if position == '摄影师' and order.photographer == user.username:
+            pre_sales += order.photography_price if order.photography_price else 0
+            post_sales += order.extra_film_price if order.extra_film_price else 0
+        elif position == '化妆师' and order.makeup_artist == user.username:
+            pre_sales += order.makeup_price if order.makeup_price else 0
+        elif position == '销售顾问' and order.sales_consultant == user.username:
+            pre_sales += order.total_price if order.total_price else 0
+        elif position == '摄像师' and order.videographer == user.username:
+            pre_sales += order.videography_price if order.videography_price else 0
+
+    # 计算各项工资
+    base_salary_rate = user.basic_salary if user.basic_salary else 0
+    base_salary = (base_salary_rate / month_days) * work_days if month_days > 0 else 0
+
+    # 提成率
+    pre_sales_rate = user.pre_sales_rate if user.pre_sales_rate else 0.03
+    post_sales_rate = user.post_sales_rate if user.post_sales_rate else 0.05
+
+    pre_sales_commission = pre_sales * pre_sales_rate
+    post_sales_commission = post_sales * post_sales_rate
+
+    # 化妆师特有项
+    referral_commission = referral_count * 0.3 if position == '化妆师' else 0
+    makeup_commission = makeup_count * 15 if position == '化妆师' else 0
+    dress_commission = dress_count * 30 if position == '化妆师' else 0
+
+    # 补贴
+    social_subsidy = user.social_subsidy if hasattr(user, 'social_subsidy') and user.social_subsidy else 0
+    housing_subsidy = user.housing_subsidy if hasattr(user, 'housing_subsidy') and user.housing_subsidy else 0
+    full_attendance_bonus = user.guaranteed_salary if user.guaranteed_salary else 0
+    other_subsidy = user.other_subsidy if user.other_subsidy else 0
+
+    # 应发总额
+    total_salary = (base_salary + pre_sales_commission + post_sales_commission +
+                   referral_commission + makeup_commission + dress_commission +
+                   full_day_bonus + social_subsidy + housing_subsidy +
+                   full_attendance_bonus + other_subsidy)
+
+    # 实发工资
+    actual_salary = total_salary - social_deduction - other_deduction
+
+    # 检查是否已存在该月工资记录
+    existing = Salary.query.filter_by(userid=userid, year_month=year_month).first()
+    if existing:
+        # 更新现有记录
+        existing.work_days = work_days
+        existing.month_days = month_days
+        existing.base_salary = base_salary
+        existing.base_salary_rate = base_salary_rate
+        existing.pre_sales = pre_sales
+        existing.pre_sales_rate = pre_sales_rate
+        existing.pre_sales_commission = pre_sales_commission
+        existing.post_sales = post_sales
+        existing.post_sales_rate = post_sales_rate
+        existing.post_sales_commission = post_sales_commission
+        existing.referral_count = referral_count
+        existing.referral_commission = referral_commission
+        existing.makeup_count = makeup_count
+        existing.makeup_commission = makeup_commission
+        existing.dress_count = dress_count
+        existing.dress_commission = dress_commission
+        existing.full_day_bonus = full_day_bonus
+        existing.social_subsidy = social_subsidy
+        existing.housing_subsidy = housing_subsidy
+        existing.full_attendance_bonus = full_attendance_bonus
+        existing.other_subsidy = other_subsidy
+        existing.total_salary = total_salary
+        existing.social_deduction = social_deduction
+        existing.other_deduction = other_deduction
+        existing.actual_salary = actual_salary
+        existing.remark = remark[:300]
+    else:
+        # 创建新记录
+        new_salary = Salary(
+            userid=userid,
+            username=user.username,
+            position=position,
+            year_month=year_month,
+            work_days=work_days,
+            month_days=month_days,
+            base_salary=base_salary,
+            base_salary_rate=base_salary_rate,
+            pre_sales=pre_sales,
+            pre_sales_rate=pre_sales_rate,
+            pre_sales_commission=pre_sales_commission,
+            post_sales=post_sales,
+            post_sales_rate=post_sales_rate,
+            post_sales_commission=post_sales_commission,
+            referral_count=referral_count,
+            referral_commission=referral_commission,
+            makeup_count=makeup_count,
+            makeup_commission=makeup_commission,
+            dress_count=dress_count,
+            dress_commission=dress_commission,
+            full_day_bonus=full_day_bonus,
+            social_subsidy=social_subsidy,
+            housing_subsidy=housing_subsidy,
+            full_attendance_bonus=full_attendance_bonus,
+            other_subsidy=other_subsidy,
+            total_salary=total_salary,
+            social_deduction=social_deduction,
+            other_deduction=other_deduction,
+            actual_salary=actual_salary,
+            remark=remark[:300],
+            created_by=session['userid']
+        )
+        db.session.add(new_salary)
+
+    try:
+        db.session.commit()
+        return jsonify({
+            'success': True,
+            'message': '工资计算成功！',
+            'data': {
+                'base_salary': base_salary,
+                'pre_sales': pre_sales,
+                'pre_sales_commission': pre_sales_commission,
+                'post_sales': post_sales,
+                'post_sales_commission': post_sales_commission,
+                'total_salary': total_salary,
+                'actual_salary': actual_salary
+            }
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': '计算失败：' + str(e)}), 500
+
+
+# 删除工资记录
+@app.route('/delete_salary/<int:salary_id>', methods=['POST'])
+def delete_salary(salary_id):
+    if 'userid' not in session:
+        return jsonify({'success': False, 'message': '未登录！'}), 401
+
+    salary = db.session.get(Salary, salary_id)
+    if not salary:
+        return jsonify({'success': False, 'message': '工资记录不存在！'}), 404
+
+    try:
+        db.session.delete(salary)
+        db.session.commit()
+        return jsonify({'success': True, 'message': '工资记录删除成功！'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': '删除失败：' + str(e)}), 500
+
+
+# 获取工资详情 API
+@app.route('/get_salary_detail/<int:salary_id>', methods=['GET'])
+def get_salary_detail(salary_id):
+    if 'userid' not in session:
+        return jsonify({'success': False, 'message': '未登录！'}), 401
+
+    salary = db.session.get(Salary, salary_id)
+    if not salary:
+        return jsonify({'success': False, 'message': '工资记录不存在！'}), 404
+
+    salary_data = {
+        'id': salary.id,
+        'userid': salary.userid,
+        'username': salary.username,
+        'position': salary.position,
+        'year_month': salary.year_month,
+        'work_days': salary.work_days,
+        'month_days': salary.month_days,
+        'base_salary': salary.base_salary,
+        'base_salary_rate': salary.base_salary_rate,
+        'pre_sales': salary.pre_sales,
+        'pre_sales_rate': salary.pre_sales_rate,
+        'pre_sales_commission': salary.pre_sales_commission,
+        'post_sales': salary.post_sales,
+        'post_sales_rate': salary.post_sales_rate,
+        'post_sales_commission': salary.post_sales_commission,
+        'referral_count': salary.referral_count,
+        'referral_commission': salary.referral_commission,
+        'makeup_count': salary.makeup_count,
+        'makeup_commission': salary.makeup_commission,
+        'dress_count': salary.dress_count,
+        'dress_commission': salary.dress_commission,
+        'full_day_bonus': salary.full_day_bonus,
+        'social_subsidy': salary.social_subsidy,
+        'housing_subsidy': salary.housing_subsidy,
+        'full_attendance_bonus': salary.full_attendance_bonus,
+        'other_subsidy': salary.other_subsidy,
+        'total_salary': salary.total_salary,
+        'social_deduction': salary.social_deduction,
+        'other_deduction': salary.other_deduction,
+        'actual_salary': salary.actual_salary,
+        'remark': salary.remark,
+        'created_time': str(salary.created_time) if salary.created_time else ''
+    }
+
+    return jsonify({'success': True, 'salary': salary_data})
 
 
 if __name__ == '__main__':

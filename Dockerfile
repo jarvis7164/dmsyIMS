@@ -1,27 +1,27 @@
-# 使用官方 Python 运行时作为父镜像
-FROM python:3.8-slim-buster
+# 大麦摄影管理系统 Dockerfile
+FROM python:3.10-slim
 
 # 设置工作目录
 WORKDIR /app
 
-# 将当前目录内容复制到容器的 /app 中
+# 先复制依赖文件，利用 Docker 缓存层
+COPY requirements.txt .
+
+# 使用 PyPI 镜像源加速安装
+RUN pip install --no-cache-dir -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+# 复制应用代码
 COPY . /app
 
-# 使用阿里云的 PyPI 镜像源
-RUN echo "[global]" > /etc/pip.conf \
-    && echo "index-url = http://mirrors.aliyun.com/pypi/simple/" >> /etc/pip.conf \
-    && echo "trusted-host = mirrors.aliyun.com" >> /etc/pip.conf
+# 创建数据卷目录
+RUN mkdir -p /app/instance
 
-# 安装 sqlite3 工具
-RUN apt-get update && apt-get install -y \
-    sqlite3 \
-    && rm -rf /var/lib/apt/lists/*
-
-# 安装所需的包
-RUN pip install --no-cache-dir -r requirements.txt
+# 设置环境变量
+ENV FLASK_APP=app.py
+ENV PYTHONUNBUFFERED=1
 
 # 暴露端口
-EXPOSE 8081
+EXPOSE 8080
 
-# 运行 gunicorn 作为容器的默认命令
-CMD ["gunicorn", "-w", "4", "--bind", "0.0.0.0:8081", "app:app"]
+# 使用 gunicorn 启动
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8080", "app:app"]

@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>工资管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 左侧导航栏样式 */
+        .sidebar {
+            width: 220px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 20px;
+            border-bottom: 1px solid #34495e;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            color: #ecf0f1;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin: 5px 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: #bdc3c7;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background-color: #34495e;
+            color: white;
+        }
+
+        .sidebar-menu a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* 主内容区域样式 */
+        .main-content {
+            margin-left: 220px;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* 顶部栏样式 */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            left: 220px;
+            right: 0;
+            top: 0;
+            padding: 15px 20px;
+            background-color: white;
+            border-bottom: 1px solid #ddd;
+            z-index: 99;
+        }
+
+        .top-bar h1 {
+            font-size: 24px;
+            color: #333;
+            margin: 0;
+        }
+
+        .logout-button a {
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .logout-button a:hover {
+            background-color: #c82333;
+        }
+
+        /* 内容容器 */
+        .content-container {
+            margin-top: 80px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 搜索表单 */
+        .search-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            min-width: 150px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        /* 表格样式 */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* 分页样式 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 20px;
+        }
+
+        .pagination a, .pagination span {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .pagination .active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .pagination .disabled {
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 800px;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .modal-header h3 {
+            color: #333;
+        }
+
+        .modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            text-align: right;
+        }
+
+        .modal-footer .btn {
+            margin-left: 10px;
+        }
+
+        /* 表单网格布局 */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        /* 工资计算结果显示 */
+        .salary-result {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+
+        .salary-result h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .salary-result .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .salary-result .result-row.total {
+            font-weight: bold;
+            color: #28a745;
+            border-bottom: none;
+            font-size: 16px;
+        }
+
+        /* 闪光提示 */
+        .flash-messages {
+            margin-bottom: 15px;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 打印样式 */
+        .print-area {
+            display: none;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-area, .print-area * {
+                visibility: visible;
+            }
+            .print-area {
+                display: block;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 20px;
+                background: white;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        /* 工资条样式 */
+        .salary-slip {
+            border: 1px solid #ddd;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+        }
+
+        .salary-slip-header {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .salary-slip-header h2 {
+            margin: 0;
+            color: #333;
+        }
+
+        .salary-slip-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .salary-slip-section {
+            margin-bottom: 15px;
+        }
+
+        .salary-slip-section h4 {
+            background: #f0f0f0;
+            padding: 8px 12px;
+            margin: 0 0 10px 0;
+            border-left: 3px solid #007bff;
+        }
+
+        .salary-slip-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .salary-slip-row.total {
+            background: #f8f9fa;
+            font-weight: bold;
+            font-size: 16px;
+            border-bottom: 2px solid #333;
+            margin-top: 10px;
+            padding: 12px;
+        }
+
+        .salary-slip-footer {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            text-align: center;
+        }
+
+        .salary-slip-footer div {
+            border-top: 1px solid #333;
+            padding-top: 10px;
+        }
+
+        /* 遮罩层 */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.3);
+            z-index: 999;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- 左侧导航栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>大麦摄影管理系统</h2>
+        </div>
+        <ul class="sidebar-menu" id="sidebarMenu">
+            <!-- 菜单将由 JavaScript 动态加载 -->
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 顶部栏 -->
+        <div class="top-bar">
+            <h1>工资管理</h1>
+            <div class="logout-button">
+                <a href="{{ url_for('logout') }}">退出</a>
+            </div>
+        </div>
+
+        <!-- 内容容器 -->
+        <div class="content-container">
+            <!-- 闪光提示 -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <!-- 搜索表单 -->
+            <form class="search-form" method="get" action="{{ url_for('salary_management') }}">
+                <div class="form-group">
+                    <label>开始日期</label>
+                    <input type="date" name="start_date" value="{{ selected_start_date }}">
+                </div>
+                <div class="form-group">
+                    <label>结束日期</label>
+                    <input type="date" name="end_date" value="{{ selected_end_date }}">
+                </div>
+                <div class="form-group">
+                    <label>岗位</label>
+                    <select name="position">
+                        <option value="">全部</option>
+                        {% for pos in positions %}
+                            <option value="{{ pos }}" {% if pos == selected_position %}selected{% endif %}>{{ pos }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>姓名</label>
+                    <input type="text" name="username" value="{{ selected_username }}" placeholder="输入姓名">
+                </div>
+                <button type="submit" class="btn btn-primary">搜索</button>
+                <button type="button" class="btn btn-success" onclick="openCalculateModal()">计算工资</button>
+            </form>
+
+            <!-- 工资列表表格 -->
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>岗位</th>
+                            <th>年月</th>
+                            <th>上班天数</th>
+                            <th>底薪</th>
+                            <th>前期业绩</th>
+                            <th>前期提成</th>
+                            <th>后期业绩</th>
+                            <th>后期提成</th>
+                            <th>补贴合计</th>
+                            <th>应发总额</th>
+                            <th>扣除合计</th>
+                            <th>实发工资</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for salary in salaries.items %}
+                        <tr>
+                            <td>{{ salary.username }}</td>
+                            <td>{{ salary.position }}</td>
+                            <td>{{ salary.year_month }}</td>
+                            <td>{{ salary.work_days }}/{{ salary.month_days }}</td>
+                            <td>¥{{ '%.2f'|format(salary.base_salary) }}</td>
+                            <td>¥{{ '%.2f'|format(salary.pre_sales) }}</td>
+                            <td>¥{{ '%.2f'|format(salary.pre_sales_commission) }}</td>
+                            <td>¥{{ '%.2f'|format(salary.post_sales) }}</td>
+                            <td>¥{{ '%.2f'|format(salary.post_sales_commission) }}</td>
+                            <td>¥{{ '%.2f'|format(salary.social_subsidy + salary.housing_subsidy + salary.full_attendance_bonus + salary.other_subsidy) }}</td>
+                            <td>¥{{ '%.2f'|format(salary.total_salary) }}</td>
+                            <td>¥{{ '%.2f'|format(salary.social_deduction + salary.other_deduction) }}</td>
+                            <td style="color: #28a745; font-weight: bold;">¥{{ '%.2f'|format(salary.actual_salary) }}</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="viewSalaryDetail({{ salary.id }})">详情</button>
+                                <button class="btn btn-success" onclick="printSalarySlip({{ salary.id }})">打印工资条</button>
+                                <button class="btn btn-danger" onclick="deleteSalary({{ salary.id }})">删除</button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="14" style="text-align: center; color: #999;">暂无工资数据，请点击"计算工资"按钮添加工资记录</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 分页 -->
+            {% if salaries.pages > 1 %}
+            <div class="pagination">
+                {% if salaries.has_prev %}
+                    <a href="{{ url_for('salary_management', page=1, year_month=selected_year_month, position=selected_position, username=selected_username) }}">首页</a>
+                    <a href="{{ url_for('salary_management', page=salaries.prev_num, year_month=selected_year_month, position=selected_position, username=selected_username) }}">上一页</a>
+                {% endif %}
+
+                <span class="active">{{ salaries.page }} / {{ salaries.pages }}</span>
+
+                {% if salaries.has_next %}
+                    <a href="{{ url_for('salary_management', page=salaries.next_num, year_month=selected_year_month, position=selected_position, username=selected_username) }}">下一页</a>
+                    <a href="{{ url_for('salary_management', page=salaries.pages, year_month=selected_year_month, position=selected_position, username=selected_username) }}">末页</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 计算工资模态框 -->
+    <div id="calculateModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCalculateModal()">&times;</span>
+            <div class="modal-header">
+                <h3>计算工资</h3>
+            </div>
+            <div class="modal-body">
+                <form id="calculateForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>选择员工 *</label>
+                            <select id="userid" name="userid" required onchange="loadPerformanceData()">
+                                <option value="">请选择员工</option>
+                                {% if all_users %}
+                                    {% for user in all_users %}
+                                        <option value="{{ user.userid }}">{{ user.username }} - {{ user.position }}</option>
+                                    {% endfor %}
+                                {% else %}
+                                    <!-- 暂无员工数据 -->
+                                {% endif %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>年月 *</label>
+                            <input type="month" id="year_month" name="year_month" required value="{{ selected_year_month or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>上班天数</label>
+                            <input type="number" id="work_days" name="work_days" value="26" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>当月天数</label>
+                            <input type="number" id="month_days" name="month_days" value="26" min="1" max="31">
+                        </div>
+                    </div>
+
+                    <!-- 化妆师特有字段 -->
+                    <div id="makeupFields" class="form-row" style="display: none;">
+                        <div class="form-group">
+                            <label>转介绍人数</label>
+                            <input type="number" id="referral_count" name="referral_count" value="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>化妆品人数</label>
+                            <input type="number" id="makeup_count" name="makeup_count" value="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>服装人数</label>
+                            <input type="number" id="dress_count" name="dress_count" value="0" min="0">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>全天奖</label>
+                            <input type="number" id="full_day_bonus" name="full_day_bonus" value="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>社保扣除</label>
+                            <input type="number" id="social_deduction" name="social_deduction" value="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>其他扣除</label>
+                            <input type="number" id="other_deduction" name="other_deduction" value="0" step="0.01">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>备注</label>
+                        <textarea id="remark" name="remark" rows="2" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+                    </div>
+
+                    <!-- 业绩数据显示 -->
+                    <div id="performanceDisplay" class="salary-result" style="display: none;">
+                        <h4>业绩数据（自动从订单获取）</h4>
+                        <div class="result-row">
+                            <span>前期业绩：</span>
+                            <span id="pre_sales">¥0.00</span>
+                        </div>
+                        <div class="result-row">
+                            <span>前期提成：</span>
+                            <span id="pre_sales_commission">¥0.00</span>
+                        </div>
+                        <div class="result-row">
+                            <span>后期业绩：</span>
+                            <span id="post_sales">¥0.00</span>
+                        </div>
+                        <div class="result-row">
+                            <span>后期提成：</span>
+                            <span id="post_sales_commission">¥0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- 计算结果显示 -->
+                    <div id="salaryResult" class="salary-result" style="display: none;">
+                        <h4>工资计算结果</h4>
+                        <div class="result-row">
+                            <span>底薪：</span>
+                            <span id="result_base_salary">¥0.00</span>
+                        </div>
+                        <div class="result-row">
+                            <span>前期提成：</span>
+                            <span id="result_pre_commission">¥0.00</span>
+                        </div>
+                        <div class="result-row">
+                            <span>后期提成：</span>
+                            <span id="result_post_commission">¥0.00</span>
+                        </div>
+                        <div class="result-row">
+                            <span>补贴合计：</span>
+                            <span id="result_subsidy">¥0.00</span>
+                        </div>
+                        <div class="result-row total">
+                            <span>应发总额：</span>
+                            <span id="result_total">¥0.00</span>
+                        </div>
+                        <div class="result-row">
+                            <span>扣除合计：</span>
+                            <span id="result_deduction">¥0.00</span>
+                        </div>
+                        <div class="result-row total">
+                            <span>实发工资：</span>
+                            <span id="result_actual" style="color: #28a745;">¥0.00</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="calculateSalary()">计算并保存</button>
+                <button class="btn btn-secondary" onclick="closeCalculateModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+
+    <!-- 工资详情模态框 -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeDetailModal()">&times;</span>
+            <div class="modal-header">
+                <h3>工资详情</h3>
+            </div>
+            <div class="modal-body" id="detailContent">
+                <!-- 详情内容将通过 JS 动态加载 -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeDetailModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 打印工资条模态框 -->
+    <div id="printModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <span class="close" onclick="closePrintModal()">&times;</span>
+            <div class="modal-header">
+                <h3>打印工资条</h3>
+            </div>
+            <div class="modal-body">
+                <div id="printContent">
+                    <!-- 工资条内容将通过 JS 动态加载 -->
+                </div>
+            </div>
+            <div class="modal-footer no-print">
+                <button class="btn btn-primary" onclick="doPrint()">打印</button>
+                <button class="btn btn-secondary" onclick="closePrintModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 打印区域（打印时使用） -->
+    <div class="print-area" id="printArea"></div>
+
+    <script>
+        // 加载菜单
+        function loadMenus() {
+            fetch('/get_menus')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const menu = buildMenuTree(data.menus);
+                        document.getElementById('sidebarMenu').innerHTML = menu;
+                    }
+                });
+        }
+
+        function buildMenuTree(menus) {
+            let html = '';
+            const parentMenus = menus.filter(m => m.parent_id === 0);
+            parentMenus.forEach(menu => {
+                const isActive = window.location.pathname === menu.menu_url ||
+                                (menu.menu_url === '/' && window.location.pathname === '/salary_management');
+                const children = menus.filter(m => m.parent_id === menu.id);
+
+                if (children.length > 0) {
+                    html += `<li><a href="#" onclick="toggleSubmenu('${menu.menu_code}')">${menu.icon || ''} ${menu.menu_name}</a>`;
+                    html += '<ul class="submenu" id="submenu-' + menu.menu_code + '" style="display: none; list-style: none; padding-left: 20px;">';
+                    children.forEach(child => {
+                        const isChildActive = window.location.pathname === child.menu_url;
+                        html += `<li><a href="${child.menu_url}" class="${isChildActive ? 'active' : ''}">${child.icon || ''} ${child.menu_name}</a></li>`;
+                    });
+                    html += '</ul></li>';
+                } else {
+                    html += `<li><a href="${menu.menu_url}" class="${isActive ? 'active' : ''}">${menu.icon || ''} ${menu.menu_name}</a></li>`;
+                }
+            });
+            return html;
+        }
+
+        function toggleSubmenu(code) {
+            const submenu = document.getElementById('submenu-' + code);
+            if (submenu) {
+                submenu.style.display = submenu.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        // 模态框操作
+        function openCalculateModal() {
+            document.getElementById('calculateModal').style.display = 'block';
+            document.getElementById('overlay').classList.add('show');
+        }
+
+        function closeCalculateModal() {
+            document.getElementById('calculateModal').style.display = 'none';
+            document.getElementById('overlay').classList.remove('show');
+            document.getElementById('calculateForm').reset();
+            document.getElementById('performanceDisplay').style.display = 'none';
+            document.getElementById('salaryResult').style.display = 'none';
+        }
+        function loadPerformanceData() {
+            const userid = document.getElementById('userid').value;
+            const yearMonth = document.getElementById('year_month').value;
+
+            if (!userid || !yearMonth) {
+                return;
+            }
+
+            fetch(`/get_user_performance/${userid}?year_month=${yearMonth}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const perf = data.performance;
+                        document.getElementById('pre_sales').textContent = '¥' + perf.pre_sales.toFixed(2);
+                        document.getElementById('pre_sales_commission').textContent = '¥' + (perf.pre_sales * (perf.pre_sales_rate || 0.03)).toFixed(2);
+                        document.getElementById('post_sales').textContent = '¥' + (perf.post_sales || 0).toFixed(2);
+                        document.getElementById('post_sales_commission').textContent = '¥' + ((perf.post_sales || 0) * (perf.post_sales_rate || 0.05)).toFixed(2);
+                        document.getElementById('performanceDisplay').style.display = 'block';
+
+                        // 如果是化妆师，显示特有字段
+                        const makeupFields = document.getElementById('makeupFields');
+                        if (perf.position === '化妆师') {
+                            makeupFields.style.display = 'flex';
+                        } else {
+                            makeupFields.style.display = 'none';
+                        }
+                    }
+                });
+        }
+
+        function closeCalculateModal() {
+            document.getElementById('calculateModal').style.display = 'none';
+            document.getElementById('overlay').classList.remove('show');
+            document.getElementById('calculateForm').reset();
+            document.getElementById('performanceDisplay').style.display = 'none';
+            document.getElementById('salaryResult').style.display = 'none';
+        }
+
+        // 加载员工业绩数据
+        function loadPerformanceData() {
+            const userid = document.getElementById('userid').value;
+            const yearMonth = document.getElementById('year_month').value;
+
+            if (!userid || !yearMonth) {
+                return;
+            }
+
+            fetch(`/get_user_performance/${userid}?year_month=${yearMonth}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const perf = data.performance;
+                        document.getElementById('pre_sales').textContent = '¥' + perf.pre_sales.toFixed(2);
+                        document.getElementById('pre_sales_commission').textContent = '¥' + (perf.pre_sales * (perf.pre_sales_rate || 0.03)).toFixed(2);
+                        document.getElementById('post_sales').textContent = '¥' + (perf.post_sales || 0).toFixed(2);
+                        document.getElementById('post_sales_commission').textContent = '¥' + ((perf.post_sales || 0) * (perf.post_sales_rate || 0.05)).toFixed(2);
+                        document.getElementById('performanceDisplay').style.display = 'block';
+
+                        // 如果是化妆师，显示特有字段
+                        const makeupFields = document.getElementById('makeupFields');
+                        if (perf.position === '化妆师') {
+                            makeupFields.style.display = 'flex';
+                        } else {
+                            makeupFields.style.display = 'none';
+                        }
+
+                        // 实时计算预览
+                        calculateSalaryPreview();
+                    }
+                });
+        }
+
+        // 计算工资
+        function calculateSalary() {
+            const userid = document.getElementById('userid').value;
+            const yearMonth = document.getElementById('year_month').value;
+
+            if (!userid || !yearMonth) {
+                alert('请选择员工和年月！');
+                return;
+            }
+
+            const formData = {
+                userid: userid,
+                year_month: yearMonth,
+                work_days: parseInt(document.getElementById('work_days').value) || 0,
+                month_days: parseInt(document.getElementById('month_days').value) || 26,
+                referral_count: parseInt(document.getElementById('referral_count').value) || 0,
+                makeup_count: parseInt(document.getElementById('makeup_count').value) || 0,
+                dress_count: parseInt(document.getElementById('dress_count').value) || 0,
+                full_day_bonus: parseFloat(document.getElementById('full_day_bonus').value) || 0,
+                social_deduction: parseFloat(document.getElementById('social_deduction').value) || 0,
+                other_deduction: parseFloat(document.getElementById('other_deduction').value) || 0,
+                remark: document.getElementById('remark').value
+            };
+
+            fetch('/calculate_salary', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('工资计算成功！');
+                    location.reload();
+                } else {
+                    alert('计算失败：' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('请求失败：' + error);
+            });
+        }
+
+        // 查看工资详情
+        function viewSalaryDetail(id) {
+            fetch(`/get_salary_detail/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const s = data.salary;
+                        const content = document.getElementById('detailContent');
+
+                        let html = '<div class="salary-result" style="display: block;">';
+                        html += '<h4>基本信息</h4>';
+                        html += `<div class="result-row"><span>姓名：</span><span>${s.username}</span></div>`;
+                        html += `<div class="result-row"><span>岗位：</span><span>${s.position}</span></div>`;
+                        html += `<div class="result-row"><span>年月：</span><span>${s.year_month}</span></div>`;
+                        html += `<div class="result-row"><span>上班天数：</span><span>${s.work_days}/${s.month_days}</span></div>`;
+
+                        html += '<h4 style="margin-top: 15px;">收入明细</h4>';
+                        html += `<div class="result-row"><span>底薪基数：</span><span>¥${s.base_salary_rate.toFixed(2)}</span></div>`;
+                        html += `<div class="result-row"><span>计算底薪：</span><span>¥${s.base_salary.toFixed(2)}</span></div>`;
+                        html += `<div class="result-row"><span>前期业绩：</span><span>¥${s.pre_sales.toFixed(2)}</span></div>`;
+                        html += `<div class="result-row"><span>前期提成率：</span><span>${(s.pre_sales_rate * 100).toFixed(1)}%</span></div>`;
+                        html += `<div class="result-row"><span>前期提成：</span><span>¥${s.pre_sales_commission.toFixed(2)}</span></div>`;
+                        html += `<div class="result-row"><span>后期业绩：</span><span>¥${s.post_sales.toFixed(2)}</span></div>`;
+                        html += `<div class="result-row"><span>后期提成率：</span><span>${(s.post_sales_rate * 100).toFixed(1)}%</span></div>`;
+                        html += `<div class="result-row"><span>后期提成：</span><span>¥${s.post_sales_commission.toFixed(2)}</span></div>`;
+
+                        // 化妆师特有项
+                        if (s.position === '化妆师') {
+                            html += `<div class="result-row"><span>转介绍提成：</span><span>¥${s.referral_commission.toFixed(2)}</span></div>`;
+                            html += `<div class="result-row"><span>化妆品提成：</span><span>¥${s.makeup_commission.toFixed(2)}</span></div>`;
+                            html += `<div class="result-row"><span>服装提成：</span><span>¥${s.dress_commission.toFixed(2)}</span></div>`;
+                        }
+
+                        html += `<div class="result-row"><span>全天奖：</span><span>¥${s.full_day_bonus.toFixed(2)}</span></div>`;
+                        html += `<div class="result-row"><span>社保补贴：</span><span>¥${s.social_subsidy.toFixed(2)}</span></div>`;
+                        html += `<div class="result-row"><span>住房补贴：</span><span>¥${s.housing_subsidy.toFixed(2)}</span></div>`;
+                        html += `<div class="result-row"><span>全勤奖：</span><span>¥${s.full_attendance_bonus.toFixed(2)}</span></div>`;
+                        html += `<div class="result-row"><span>其他补贴：</span><span>¥${s.other_subsidy.toFixed(2)}</span></div>`;
+
+                        html += '<h4 style="margin-top: 15px;">汇总</h4>';
+                        html += `<div class="result-row total"><span>应发总额：</span><span>¥${s.total_salary.toFixed(2)}</span></div>`;
+                        html += `<div class="result-row"><span>社保扣除：</span><span>¥${s.social_deduction.toFixed(2)}</span></div>`;
+                        html += `<div class="result-row"><span>其他扣除：</span><span>¥${s.other_deduction.toFixed(2)}</span></div>`;
+                        html += `<div class="result-row total" style="color: #28a745;"><span>实发工资：</span><span>¥${s.actual_salary.toFixed(2)}</span></div>`;
+
+                        if (s.remark) {
+                            html += `<h4 style="margin-top: 15px;">备注</h4><div class="result-row"><span></span><span>${s.remark}</span></div>`;
+                        }
+
+                        html += `<div style="margin-top: 10px; color: #999; font-size: 12px;">创建时间：${s.created_time}</div>`;
+                        html += '</div>';
+
+                        content.innerHTML = html;
+                        document.getElementById('detailModal').style.display = 'block';
+                        document.getElementById('overlay').classList.add('show');
+                    } else {
+                        alert('获取详情失败：' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('请求失败：' + error);
+                });
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').style.display = 'none';
+            document.getElementById('overlay').classList.remove('show');
+        }
+
+        // 打印工资条
+        function printSalarySlip(id) {
+            fetch(`/get_salary_detail/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const s = data.salary;
+
+                        // 生成工资条 HTML
+                        let html = '<div class="salary-slip">';
+
+                        // 标题
+                        html += '<div class="salary-slip-header">';
+                        html += '<h2>大麦摄影管理系统 - 工资条</h2>';
+                        html += `<p style="color: #666; margin: 5px 0 0 0;">${s.year_month} 月份</p>`;
+                        html += '</div>';
+
+                        // 基本信息
+                        html += '<div class="salary-slip-info">';
+                        html += `<div class="result-row"><span>姓名：</span><span>${s.username}</span></div>`;
+                        html += `<div class="result-row"><span>岗位：</span><span>${s.position}</span></div>`;
+                        html += `<div class="result-row"><span>上班天数：</span><span>${s.work_days}/${s.month_days} 天</span></div>`;
+                        html += `<div class="result-row"><span>备注：</span><span>${s.remark || '-'}</span></div>`;
+                        html += '</div>';
+
+                        // 应发项目
+                        html += '<div class="salary-slip-section">';
+                        html += '<h4>应发项目</h4>';
+                        html += `<div class="salary-slip-row"><span>底薪</span><span>¥${s.base_salary.toFixed(2)}</span></div>`;
+                        html += `<div class="salary-slip-row"><span>前期提成</span><span>¥${s.pre_sales_commission.toFixed(2)}</span></div>`;
+                        html += `<div class="salary-slip-row"><span>后期提成</span><span>¥${s.post_sales_commission.toFixed(2)}</span></div>`;
+
+                        if (s.position === '化妆师') {
+                            html += `<div class="salary-slip-row"><span>转介绍提成</span><span>¥${s.referral_commission.toFixed(2)}</span></div>`;
+                            html += `<div class="salary-slip-row"><span>化妆品提成</span><span>¥${s.makeup_commission.toFixed(2)}</span></div>`;
+                            html += `<div class="salary-slip-row"><span>服装提成</span><span>¥${s.dress_commission.toFixed(2)}</span></div>`;
+                        }
+
+                        html += `<div class="salary-slip-row"><span>全天奖</span><span>¥${s.full_day_bonus.toFixed(2)}</span></div>`;
+                        html += `<div class="salary-slip-row"><span>社保补贴</span><span>¥${s.social_subsidy.toFixed(2)}</span></div>`;
+                        html += `<div class="salary-slip-row"><span>住房补贴</span><span>¥${s.housing_subsidy.toFixed(2)}</span></div>`;
+                        html += `<div class="salary-slip-row"><span>全勤奖</span><span>¥${s.full_attendance_bonus.toFixed(2)}</span></div>`;
+                        html += `<div class="salary-slip-row"><span>其他补贴</span><span>¥${s.other_subsidy.toFixed(2)}</span></div>`;
+                        html += `<div class="salary-slip-row total"><span>应发合计</span><span>¥${s.total_salary.toFixed(2)}</span></div>`;
+                        html += '</div>';
+
+                        // 扣款项目
+                        html += '<div class="salary-slip-section">';
+                        html += '<h4>扣款项目</h4>';
+                        html += `<div class="salary-slip-row"><span>社保个人部分</span><span>¥${s.social_deduction.toFixed(2)}</span></div>`;
+                        html += `<div class="salary-slip-row"><span>其他扣款</span><span>¥${s.other_deduction.toFixed(2)}</span></div>`;
+                        html += `<div class="salary-slip-row total" style="background: #ffe6e6;"><span>扣款合计</span><span>¥${(s.social_deduction + s.other_deduction).toFixed(2)}</span></div>`;
+                        html += '</div>';
+
+                        // 实发工资
+                        html += '<div class="salary-slip-section">';
+                        html += `<div class="salary-slip-row total" style="background: #d4edda; border: 2px solid #28a745;"><span>实发工资</span><span style="color: #28a745;">¥${s.actual_salary.toFixed(2)}</span></div>`;
+                        html += '</div>';
+
+                        // 签名栏
+                        html += '<div class="salary-slip-footer">';
+                        html += '<div>制单人：财务</div>';
+                        html += '<div>审核人：</div>';
+                        html += '<div>领取人：</div>';
+                        html += '</div>';
+
+                        // 打印日期
+                        const now = new Date();
+                        html += `<p style="text-align: right; margin-top: 20px; color: #999; font-size: 12px;">打印时间：${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}</p>`;
+
+                        html += '</div>';
+
+                        document.getElementById('printContent').innerHTML = html;
+                        document.getElementById('printModal').style.display = 'block';
+                        document.getElementById('overlay').classList.add('show');
+                    } else {
+                        alert('获取工资信息失败：' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('请求失败：' + error);
+                });
+        }
+
+        function closePrintModal() {
+            document.getElementById('printModal').style.display = 'none';
+            document.getElementById('overlay').classList.remove('show');
+        }
+
+        function doPrint() {
+            const printContent = document.getElementById('printContent').innerHTML;
+            document.getElementById('printArea').innerHTML = printContent;
+            window.print();
+            document.getElementById('printArea').innerHTML = '';
+        }
+
+        // 删除工资记录
+        function deleteSalary(id) {
+            if (!confirm('确定要删除这条工资记录吗？')) {
+                return;
+            }
+
+            fetch(`/delete_salary/${id}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('删除成功！');
+                    location.reload();
+                } else {
+                    alert('删除失败：' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('请求失败：' + error);
+            });
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMenus();
+
+            // 设置计算工资模态框的默认年月为当前月
+            const now = new Date();
+            const currentMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+            document.getElementById('year_month').value = currentMonth;
+            document.getElementById('work_days').value = 26;
+
+            // 监听表单输入变化，实时计算
+            const inputs = document.querySelectorAll('#calculateForm input');
+            inputs.forEach(input => {
+                input.addEventListener('input', calculateSalaryPreview);
+            });
+        });
+
+        // 实时计算预览（简化版）
+        function calculateSalaryPreview() {
+            const userid = document.getElementById('userid').value;
+            const yearMonth = document.getElementById('year_month').value;
+            const workDays = parseInt(document.getElementById('work_days').value) || 0;
+            const monthDays = parseInt(document.getElementById('month_days').value) || 26;
+
+            if (!userid || !yearMonth) {
+                return;
+            }
+
+            // 获取业绩数据并计算
+            fetch(`/get_user_performance/${userid}?year_month=${yearMonth}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const perf = data.performance;
+
+                        // 计算底薪
+                        const baseSalaryRate = perf.base_salary_rate || 0;
+                        const baseSalary = (baseSalaryRate / monthDays) * workDays;
+
+                        // 计算提成
+                        const preSalesCommission = perf.pre_sales * (perf.pre_sales_rate || 0.03);
+                        const postSalesCommission = (perf.post_sales || 0) * (perf.post_sales_rate || 0.05);
+
+                        // 补贴
+                        const subsidy = (perf.social_subsidy || 0) + (perf.housing_subsidy || 0) + (perf.other_subsidy || 0);
+
+                        // 扣除
+                        const socialDeduction = parseFloat(document.getElementById('social_deduction').value) || 0;
+                        const otherDeduction = parseFloat(document.getElementById('other_deduction').value) || 0;
+                        const fullDayBonus = parseFloat(document.getElementById('full_day_bonus').value) || 0;
+
+                        // 化妆师特有项
+                        let extraCommission = 0;
+                        if (perf.position === '化妆师') {
+                            const referralCount = parseInt(document.getElementById('referral_count').value) || 0;
+                            const makeupCount = parseInt(document.getElementById('makeup_count').value) || 0;
+                            const dressCount = parseInt(document.getElementById('dress_count').value) || 0;
+                            extraCommission = referralCount * 0.3 + makeupCount * 15 + dressCount * 30;
+                        }
+
+                        // 应发总额
+                        const totalSalary = baseSalary + preSalesCommission + postSalesCommission + subsidy + fullDayBonus + extraCommission;
+
+                        // 实发工资
+                        const actualSalary = totalSalary - socialDeduction - otherDeduction;
+
+                        // 显示结果
+                        document.getElementById('result_base_salary').textContent = '¥' + baseSalary.toFixed(2);
+                        document.getElementById('result_pre_commission').textContent = '¥' + preSalesCommission.toFixed(2);
+                        document.getElementById('result_post_commission').textContent = '¥' + postSalesCommission.toFixed(2);
+                        document.getElementById('result_subsidy').textContent = '¥' + (subsidy + fullDayBonus + extraCommission).toFixed(2);
+                        document.getElementById('result_total').textContent = '¥' + totalSalary.toFixed(2);
+                        document.getElementById('result_deduction').textContent = '¥' + (socialDeduction + otherDeduction).toFixed(2);
+                        document.getElementById('result_actual').textContent = '¥' + actualSalary.toFixed(2);
+                        document.getElementById('salaryResult').style.display = 'block';
+                    }
+                });
+        }
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const calcModal = document.getElementById('calculateModal');
+            const detailModal = document.getElementById('detailModal');
+            const printModal = document.getElementById('printModal');
+            if (event.target === calcModal) {
+                closeCalculateModal();
+            }
+            if (event.target === detailModal) {
+                closeDetailModal();
+            }
+            if (event.target === printModal) {
+                closePrintModal();
+            }
+        }
+    </script>
+</body>
+</html>

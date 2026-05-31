@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <title>订单信息列表</title>
+    <title>大麦摄影管理系统</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjNjY3ZWVhIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjNzY0YmEyIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHBhdGggZD0iTTEyIDE4YTIgMiAwIDAgMSAyLTJoOGwyLjUtM2ExIDIgMCAwIDEgMS41LS43aDEyYTIgMiAwIDAgMSAxLjUuN0w0MiAxNmg4YTIgMiAwIDAgMSAyIDJ2MzJhMiAyIDAgMCAxLTIgMkgxNGEyIDIgMCAwIDEtMi0yVjE4eiIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjMyIiBjeT0iMzUiIHI9IjEwIiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMzIiIGN5PSIzNSIgcj0iNiIgZmlsbD0idXJsKCNnKSIvPjxjaXJjbGUgY3g9IjQ2IiBjeT0iMjQiIHI9IjIiIGZpbGw9IiNmZmYiIG9wYWNpdHk9Ii42Ii8+PC9zdmc+">
     <style>
         * {
             margin: 0;
@@ -98,6 +99,33 @@
             margin: 0;
         }
 
+        .top-bar-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-info {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .change-password-btn {
+            background-color: #6f42c1;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-size: 13px;
+        }
+
+        .change-password-btn:hover {
+            background-color: #5a32a3;
+        }
+
         .logout-button a {
             background-color: #dc3545;
             color: white;
@@ -135,6 +163,187 @@
 
         .add-btn:hover {
             background-color: #218838;
+        }
+
+        /* 搜索面板样式 */
+        .search-panel {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #e9ecef;
+        }
+
+        .search-form {
+            display: flex;
+            flex-direction: row;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 120px;
+            flex: 0 0 auto;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: white;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .date-range-input {
+            cursor: pointer;
+            background-color: white;
+        }
+
+        .date-range-input::placeholder {
+            color: #999;
+            font-style: italic;
+        }
+
+        /* 日期选择器弹窗 */
+        .date-picker-popup {
+            display: none;
+            position: fixed;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            padding: 15px;
+            z-index: 10000;
+            min-width: 320px;
+            width: 320px;
+        }
+
+        .date-picker-popup.active {
+            display: block;
+        }
+
+        .date-picker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .date-picker-header h4 {
+            margin: 0;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .date-picker-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .date-picker-close:hover {
+            color: #333;
+        }
+
+        .date-picker-body {
+            display: flex;
+            gap: 10px;
+        }
+
+        .date-picker-body .date-input-group {
+            flex: 1;
+        }
+
+        .date-picker-body label {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .date-picker-body input[type="date"] {
+            width: calc(100% - 16px);
+            padding: 8px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .date-picker-footer {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .btn-search {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-search:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-reset {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background-color: #545b62;
+        }
+
+        .btn-clear {
+            background-color: #f8f9fa;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+
+        .btn-clear:hover {
+            background-color: #e9ecef;
+        }
+
+        .search-btn-group {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            height: 100%;
+            padding-bottom: 1px;
+        }
+
+        .search-btn-group .btn {
+            min-width: 60px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
         }
 
         /* 弹窗遮罩层 */
@@ -324,6 +533,33 @@
             box-shadow: none;
         }
 
+        /* 价格显示输入框样式 */
+        .price-display {
+            padding: 10px 14px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #f8f9fa;
+            color: #dc3545;
+            font-weight: 600;
+            cursor: not-allowed;
+        }
+
+        /* 价格输入框样式（可编辑） */
+        .price-input {
+            padding: 10px 14px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .price-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
         /* 表单选择框样式 */
         .form-group select {
             padding: 10px 14px;
@@ -339,6 +575,28 @@
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* 表单文本域样式 */
+        .form-group textarea {
+            padding: 10px 14px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea[readonly] {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
         }
 
         /* 分区标题 */
@@ -473,6 +731,12 @@
             z-index: 6;
         }
 
+        /* 创建时间列样式 */
+        .created-time-cell {
+            min-width: 160px;
+            white-space: nowrap;
+        }
+
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
@@ -598,6 +862,297 @@
             color: #0c5460;
             border: 1px solid #bee5eb;
         }
+
+        /* 详情弹窗样式 */
+        .detail-section {
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .detail-section-header {
+            background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
+            color: white;
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .detail-section-content {
+            padding: 16px;
+            background-color: #fff;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            color: #212529;
+            font-weight: 500;
+        }
+
+        .detail-value.price-value {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .detail-value.total-value {
+            color: #dc3545;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .detail-remark {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 14px;
+            color: #495057;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .detail-remark.empty {
+            color: #adb5bd;
+            font-style: italic;
+        }
+
+        .detail-full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* 打印按钮样式 */
+        .print-btn {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .print-btn:hover {
+            background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        /* 隐藏打印专用容器 */
+        .print-only {
+            display: none;
+        }
+
+        /* A4 打印样式 */
+        @media print {
+            @page {
+                size: A4;
+                margin: 20mm;
+            }
+
+            body {
+                background: white;
+                font-size: 10pt;
+                line-height: 1.3;
+            }
+
+            /* 隐藏不需要打印的元素 */
+            .sidebar,
+            .top-bar,
+            .content-card,
+            .pagination,
+            .pagination-fixed,
+            .action-btn,
+            button,
+            a,
+            .no-print,
+            #viewOrderModal,
+            #addOrderModal,
+            #editOrderModal,
+            #changePasswordModal,
+            .print-btn-only {
+                display: none !important;
+                visibility: hidden !important;
+            }
+
+            /* 打印时的模态框样式 */
+            #printContainer {
+                display: block !important;
+                visibility: visible !important;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                padding: 15mm 18mm;
+                margin: 0;
+                box-sizing: border-box;
+            }
+
+            .print-header {
+                text-align: center;
+                margin-bottom: 15px;
+                border-bottom: 2px solid #17a2b8;
+                padding-bottom: 10px;
+            }
+
+            .print-header h1 {
+                color: #17a2b8;
+                font-size: 18pt;
+                margin: 0 0 5px 0;
+            }
+
+            .print-header .print-date {
+                color: #6c757d;
+                font-size: 9pt;
+            }
+
+            .print-section {
+                margin-bottom: 10px;
+                border: 1px solid #dee2e6;
+                border-radius: 6px;
+                overflow: hidden;
+                page-break-inside: avoid;
+            }
+
+            .print-section-header {
+                background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
+                color: white;
+                padding: 6px 12px;
+                font-weight: 600;
+                font-size: 11pt;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .print-section-content {
+                padding: 10px;
+                background-color: white;
+            }
+
+            .print-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+
+            /* 订单信息使用 3 列布局 */
+            .print-grid.grid-3 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            /* 服务价格使用 4 列布局 */
+            .print-grid.grid-4 {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .print-item {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+
+            .print-label {
+                font-size: 8pt;
+                color: #6c757d;
+                font-weight: 500;
+            }
+
+            .print-value {
+                font-size: 10pt;
+                color: #212529;
+                font-weight: 500;
+            }
+
+            .print-value.price-value {
+                color: #28a745;
+                font-weight: 600;
+            }
+
+            .print-value.total-value {
+                color: #dc3545;
+                font-weight: 700;
+                font-size: 11pt;
+            }
+
+            .print-remark {
+                background-color: #f8f9fa;
+                border: 1px solid #dee2e6;
+                border-radius: 4px;
+                padding: 8px;
+                font-size: 9pt;
+                color: #495057;
+                line-height: 1.4;
+                white-space: pre-wrap;
+                word-break: break-word;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .print-remark.empty {
+                color: #adb5bd;
+                font-style: italic;
+            }
+
+            .print-footer {
+                margin-top: 20px;
+                border-top: 1px solid #dee2e6;
+                padding-top: 10px;
+                display: flex;
+                justify-content: space-between;
+                page-break-inside: avoid;
+            }
+
+            .print-signature {
+                text-align: center;
+                width: 35%;
+            }
+
+            .print-signature-line {
+                border-top: 1px solid #212529;
+                margin-top: 30px;
+                padding-top: 3px;
+                font-size: 9pt;
+            }
+        }
+
+        .view-btn {
+            background-color: #6f42c1;
+            color: white;
+        }
+
+        .view-btn:hover {
+            background-color: #5a32a3;
+            color: white;
+        }
+
+        /* 隐藏价格列 */
+        .price-col {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -616,13 +1171,58 @@
         <!-- 顶部栏 - 固定在视口顶部 -->
         <div class="top-bar">
             <h1>订单信息列表</h1>
-            <div class="logout-button">
-                <a href="{{ url_for('logout') }}">退出登录</a>
+            <div class="top-bar-actions">
+                <span class="user-info">当前用户：<strong>{{ session.get('userid', '') }}</strong></span>
+                <button onclick="openChangePasswordModal()" class="change-password-btn">修改密码</button>
+                <div class="logout-button">
+                    <a href="{{ url_for('logout') }}">退出登录</a>
+                </div>
             </div>
         </div>
 
         <!-- 内容卡片 -->
         <div class="content-card">
+            <!-- 搜索表单 -->
+            <div class="search-panel">
+                <form class="search-form" method="get" action="{{ url_for('index') }}">
+                    <div class="form-group">
+                        <label>新郎/新娘姓名</label>
+                        <input type="text" name="name_keyword" value="{{ selected_name_keyword or '' }}" placeholder="输入姓名关键词">
+                    </div>
+                    <div class="form-group">
+                        <label>拍摄时间范围</label>
+                        <input type="text" name="shoot_time_range" value="{{ (selected_shoot_start + ' 至 ' + selected_shoot_end) if (selected_shoot_start or selected_shoot_end) else '' }}" placeholder="点击选择开始和结束日期" class="date-range-input" data-start-field="shoot_start" data-end-field="shoot_end" onclick="showDatePicker(this)">
+                        <input type="hidden" id="shoot_start" name="shoot_start" value="{{ selected_shoot_start or '' }}">
+                        <input type="hidden" id="shoot_end" name="shoot_end" value="{{ selected_shoot_end or '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label>订单时间范围</label>
+                        <input type="text" name="order_time_range" value="{{ (selected_order_start + ' 至 ' + selected_order_end) if (selected_order_start or selected_order_end) else '' }}" placeholder="点击选择开始和结束日期" class="date-range-input" data-start-field="order_start" data-end-field="order_end" onclick="showDatePicker(this)">
+                        <input type="hidden" id="order_start" name="order_start" value="{{ selected_order_start or '' }}">
+                        <input type="hidden" id="order_end" name="order_end" value="{{ selected_order_end or '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label>跟拍时间范围</label>
+                        <input type="text" name="photo_time_range" value="{{ (selected_photo_start + ' 至 ' + selected_photo_end) if (selected_photo_start or selected_photo_end) else '' }}" placeholder="点击选择开始和结束日期" class="date-range-input" data-start-field="photo_start" data-end-field="photo_end" onclick="showDatePicker(this)">
+                        <input type="hidden" id="photo_start" name="photo_start" value="{{ selected_photo_start or '' }}">
+                        <input type="hidden" id="photo_end" name="photo_end" value="{{ selected_photo_end or '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label>跟妆时间范围</label>
+                        <input type="text" name="makeup_time_range" value="{{ (selected_makeup_start + ' 至 ' + selected_makeup_end) if (selected_makeup_start or selected_makeup_end) else '' }}" placeholder="点击选择开始和结束日期" class="date-range-input" data-start-field="makeup_start" data-end-field="makeup_end" onclick="showDatePicker(this)">
+                        <input type="hidden" id="makeup_start" name="makeup_start" value="{{ selected_makeup_start or '' }}">
+                        <input type="hidden" id="makeup_end" name="makeup_end" value="{{ selected_makeup_end or '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <div class="search-btn-group">
+                            <button type="submit" class="btn btn-search">搜索</button>
+                            <button type="button" class="btn btn-reset" onclick="resetSearch()">重置</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
             <!-- 添加订单按钮 -->
             <button onclick="openAddOrderModal()" class="add-btn">+ 添加订单</button>
 
@@ -646,13 +1246,14 @@
                             <th>新娘姓名</th>
                             <th>新郎电话</th>
                             <th>新娘电话</th>
-                            <th>婚纱照价格</th>
-                            <th>跟拍价格</th>
-                            <th>跟妆价格</th>
-                            <th>摄像价格</th>
-                            <th>租礼服价格</th>
-                            <th>婚庆价格</th>
-                            <th>总价格</th>
+                            <th class="price-col">婚纱照价格</th>
+                            <th class="price-col">跟拍价格</th>
+                            <th class="price-col">跟妆价格</th>
+                            <th class="price-col">摄像价格</th>
+                            <th class="price-col">租礼服价格</th>
+                            <th class="price-col">婚庆价格</th>
+                            <th class="price-col">加片金额</th>
+                            <th class="price-col">总价格</th>
                             <th>订单时间</th>
                             <th>拍摄时间</th>
                             <th>选片时间</th>
@@ -671,17 +1272,18 @@
                             <td>{{ order.bride_name }}</td>
                             <td>{{ order.groom_phone }}</td>
                             <td>{{ order.bride_phone }}</td>
-                            <td>{{ order.wedding_dress_price }}</td>
-                            <td>{{ order.photography_price }}</td>
-                            <td>{{ order.makeup_price }}</td>
-                            <td>{{ order.videography_price }}</td>
-                            <td>{{ order.dress_rental_price }}</td>
-                            <td>{{ order.wedding_celebration_price }}</td>
-                            <td>{{ order.total_price }}</td>
-                            <td>{{ order.order_time.strftime('%Y-%m-%d %H:%M') if order.order_time else '' }}</td>
-                            <td>{{ order.shoot_time.strftime('%Y-%m-%d %H:%M') if order.shoot_time else '' }}</td>
-                            <td>{{ order.choosepicture_time.strftime('%Y-%m-%d %H:%M') if order.choosepicture_time else '' }}</td>
-                            <td>{{ order.confirmpicture_time.strftime('%Y-%m-%d %H:%M') if order.confirmpicture_time else '' }}</td>
+                            <td class="price-col">{{ "￥{:,.0f}".format(order.wedding_dress_price) if order.wedding_dress_price else '￥0' }}</td>
+                            <td class="price-col">{{ "￥{:,.0f}".format(order.photography_price) if order.photography_price else '￥0' }}</td>
+                            <td class="price-col">{{ "￥{:,.0f}".format(order.makeup_price) if order.makeup_price else '￥0' }}</td>
+                            <td class="price-col">{{ "￥{:,.0f}".format(order.videography_price) if order.videography_price else '￥0' }}</td>
+                            <td class="price-col">{{ "￥{:,.0f}".format(order.dress_rental_price) if order.dress_rental_price else '￥0' }}</td>
+                            <td class="price-col">{{ "￥{:,.0f}".format(order.wedding_celebration_price) if order.wedding_celebration_price else '￥0' }}</td>
+                            <td class="price-col">{{ "￥{:,.0f}".format(order.extra_film_price) if order.extra_film_price else '￥0' }}</td>
+                            <td class="price-col">{{ "￥{:,.0f}".format(order.total_price) if order.total_price else '￥0' }}</td>
+                            <td>{{ order.order_time.strftime('%Y-%m-%d') if order.order_time else '' }}</td>
+                            <td>{{ order.shoot_time.strftime('%Y-%m-%d') if order.shoot_time else '' }}</td>
+                            <td>{{ order.choosePicture_time.strftime('%Y-%m-%d') if order.choosePicture_time else '' }}</td>
+                            <td>{{ order.confirmPicture_time.strftime('%Y-%m-%d') if order.confirmPicture_time else '' }}</td>
                             <td>
                                 <select class="status-select status-{{ order.order_status }}" onchange="updateOrderStatus({{ order.orderid }}, this)">
                                     <option value="待拍摄" {% if order.order_status == '待拍摄' %}selected{% endif %}>待拍摄</option>
@@ -696,8 +1298,9 @@
                             <td>{{ order.photographer }}</td>
                             <td>{{ order.makeup_artist }}</td>
                             <td>{{ order.created_by }}</td>
-                            <td>{{ order.created_time }}</td>
+                            <td class="created-time-cell">{{ order.created_time.strftime('%Y-%m-%d %H:%M') if order.created_time else '' }}</td>
                             <td>
+                                <button onclick="openViewOrderModal({{ order.orderid }})" class="action-btn view-btn">详情</button>
                                 <button onclick="openEditOrderModal({{ order.orderid }})" class="action-btn edit-btn">编辑</button>
                                 <a href="{{ url_for('delete_order', order_id=order.orderid) }}" class="action-btn delete-btn" onclick="return confirmDelete();">删除</a>
                             </td>
@@ -760,27 +1363,31 @@
                     </div>
                     <div class="form-group">
                         <label>婚纱照价格</label>
-                        <input type="number" step="0.01" name="wedding_dress_price" oninput="calculateTotalPrice()">
+                        <input type="text" name="wedding_dress_price" oninput="calculateTotalPrice()" onkeydown="validateIntegerInput(event)" placeholder="输入整数金额">
                     </div>
                     <div class="form-group">
                         <label>跟拍价格</label>
-                        <input type="number" step="0.01" name="photography_price" oninput="calculateTotalPrice()">
+                        <input type="text" name="photography_price" oninput="calculateTotalPrice()" onkeydown="validateIntegerInput(event)" placeholder="输入整数金额">
                     </div>
                     <div class="form-group">
                         <label>摄像价格</label>
-                        <input type="number" step="0.01" name="videography_price" oninput="calculateTotalPrice()">
+                        <input type="text" name="videography_price" oninput="calculateTotalPrice()" onkeydown="validateIntegerInput(event)" placeholder="输入整数金额">
                     </div>
                     <div class="form-group">
                         <label>跟妆价格</label>
-                        <input type="number" step="0.01" name="makeup_price" oninput="calculateTotalPrice()">
+                        <input type="text" name="makeup_price" oninput="calculateTotalPrice()" onkeydown="validateIntegerInput(event)" placeholder="输入整数金额">
                     </div>
                     <div class="form-group">
                         <label>租礼服价格</label>
-                        <input type="number" step="0.01" name="dress_rental_price" oninput="calculateTotalPrice()">
+                        <input type="text" name="dress_rental_price" oninput="calculateTotalPrice()" onkeydown="validateIntegerInput(event)" placeholder="输入整数金额">
                     </div>
                     <div class="form-group">
                         <label>婚庆价格</label>
-                        <input type="number" step="0.01" name="wedding_celebration_price" oninput="calculateTotalPrice()">
+                        <input type="text" name="wedding_celebration_price" oninput="calculateTotalPrice()" onkeydown="validateIntegerInput(event)" placeholder="输入整数金额">
+                    </div>
+                    <div class="form-group">
+                        <label>加片金额</label>
+                        <input type="text" name="extra_film_price" oninput="calculateTotalPrice()" onkeydown="validateIntegerInput(event)" placeholder="输入整数金额">
                     </div>
                     <div class="form-group full-width">
                         <label>总价格</label>
@@ -823,6 +1430,12 @@
                     <div class="form-group">
                         <label>化妆师<span class="required">*</span></label>
                         <input type="text" name="makeup_artist" required>
+                    </div>
+
+                    <!-- 备注 -->
+                    <div class="form-group full-width">
+                        <label>备注</label>
+                        <textarea name="remark" rows="3" maxlength="300" placeholder="最多输入 300 字"></textarea>
                     </div>
                 </form>
             </div>
@@ -871,27 +1484,31 @@
                     </div>
                     <div class="form-group">
                         <label>婚纱照价格</label>
-                        <input type="number" step="0.01" name="wedding_dress_price" id="edit_wedding_dress_price" readonly>
+                        <input type="text" name="wedding_dress_price" id="edit_wedding_dress_price" readonly class="price-display">
                     </div>
                     <div class="form-group">
                         <label>跟拍价格</label>
-                        <input type="number" step="0.01" name="photography_price" id="edit_photography_price" readonly>
+                        <input type="text" name="photography_price" id="edit_photography_price" readonly class="price-display">
                     </div>
                     <div class="form-group">
                         <label>摄像价格</label>
-                        <input type="number" step="0.01" name="videography_price" id="edit_videography_price" readonly>
+                        <input type="text" name="videography_price" id="edit_videography_price" readonly class="price-display">
                     </div>
                     <div class="form-group">
                         <label>跟妆价格</label>
-                        <input type="number" step="0.01" name="makeup_price" id="edit_makeup_price" readonly>
+                        <input type="text" name="makeup_price" id="edit_makeup_price" readonly class="price-display">
                     </div>
                     <div class="form-group">
                         <label>租礼服价格</label>
-                        <input type="number" step="0.01" name="dress_rental_price" id="edit_dress_rental_price" readonly>
+                        <input type="text" name="dress_rental_price" id="edit_dress_rental_price" readonly class="price-display">
                     </div>
                     <div class="form-group">
                         <label>婚庆价格</label>
-                        <input type="number" step="0.01" name="wedding_celebration_price" id="edit_wedding_celebration_price" readonly>
+                        <input type="text" name="wedding_celebration_price" id="edit_wedding_celebration_price" readonly class="price-display">
+                    </div>
+                    <div class="form-group">
+                        <label>加片金额</label>
+                        <input type="text" name="extra_film_price" id="edit_extra_film_price" oninput="calculateEditTotalPrice()" onkeydown="validateIntegerInput(event)" class="price-input">
                     </div>
                     <div class="form-group full-width">
                         <label>总价格</label>
@@ -946,6 +1563,12 @@
                         <label>化妆师<span class="required">*</span></label>
                         <input type="text" name="makeup_artist" id="edit_makeup_artist" required>
                     </div>
+
+                    <!-- 备注 -->
+                    <div class="form-group full-width">
+                        <label>备注</label>
+                        <textarea name="remark" id="edit_remark" rows="3" maxlength="300" placeholder="最多输入 300 字"></textarea>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -956,6 +1579,25 @@
     </div>
 
     <script>
+        // 验证整数输入，禁止输入非数字字符（包括小数点）
+        function validateIntegerInput(event) {
+            var key = event.key;
+            // 允许：数字、退格、删除、Tab、Esc、回车、箭头键
+            var allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight'];
+            if (allowedKeys.includes(key)) {
+                return;
+            }
+            // 阻止小数点和 e（科学计数法）
+            if (key === '.' || key === 'e' || key === 'E' || key === '-' || key === '+') {
+                event.preventDefault();
+                return;
+            }
+            // 只允许 0-9
+            if (!/^[0-9]$/.test(key)) {
+                event.preventDefault();
+            }
+        }
+
         // 打开添加订单弹窗
         function openAddOrderModal() {
             document.getElementById('addOrderModal').classList.add('active');
@@ -987,16 +1629,16 @@
             var choosePictureTime = document.getElementById('choosePicture_time').value;
             var confirmPictureTime = document.getElementById('confirmPicture_time').value;
 
-            // 选片时间必须大于等于拍摄时间
+            // 选片时间必须大于等于拍摄时间（允许相等）
             if (choosePictureTime && shootTime && choosePictureTime < shootTime) {
                 alert('选片时间必须大于或等于拍摄时间！');
                 document.getElementById('choosePicture_time').value = shootTime;
                 return false;
             }
 
-            // 看精修时间必须大于选片时间
-            if (confirmPictureTime && choosePictureTime && confirmPictureTime <= choosePictureTime) {
-                alert('看精修时间必须大于选片时间！');
+            // 看精修时间必须大于等于选片时间（允许相等）
+            if (confirmPictureTime && choosePictureTime && confirmPictureTime < choosePictureTime) {
+                alert('看精修时间必须大于或等于选片时间！');
                 document.getElementById('confirmPicture_time').value = choosePictureTime;
                 return false;
             }
@@ -1004,17 +1646,60 @@
             return true;
         }
 
+        // 格式化价格为人民币样式（整数，带千位分隔符）
+        function formatPrice(price) {
+            if (price === null || price === undefined || price === '') {
+                return '';
+            }
+            var num = parseInt(price) || 0;
+            return '￥' + num.toLocaleString('zh-CN');
+        }
+
+        // 格式化日期时间（用于详情弹窗）
+        function formatDateTime(dateStr) {
+            if (!dateStr) {
+                return '-';
+            }
+            try {
+                // 处理 "2023-07-29 15:00:00" 或 "2023-07-29T15:00:00" 格式
+                var parts = dateStr.split(' ');
+                if (parts.length === 1) {
+                    // 只有日期，无时分秒
+                    return parts[0];
+                }
+                // 有日期和时间，返回完整格式
+                return dateStr.replace('T', ' ').substring(0, 16);
+            } catch (e) {
+                return '-';
+            }
+        }
+
         // 计算总价格
         function calculateTotalPrice() {
-            var weddingDressPrice = parseFloat(document.getElementsByName('wedding_dress_price')[0].value) || 0;
-            var photographyPrice = parseFloat(document.getElementsByName('photography_price')[0].value) || 0;
-            var videographyPrice = parseFloat(document.getElementsByName('videography_price')[0].value) || 0;
-            var makeupPrice = parseFloat(document.getElementsByName('makeup_price')[0].value) || 0;
-            var dressRentalPrice = parseFloat(document.getElementsByName('dress_rental_price')[0].value) || 0;
-            var weddingCelebrationPrice = parseFloat(document.getElementsByName('wedding_celebration_price')[0].value) || 0;
+            var weddingDressPrice = parseInt(document.getElementsByName('wedding_dress_price')[0].value) || 0;
+            var photographyPrice = parseInt(document.getElementsByName('photography_price')[0].value) || 0;
+            var videographyPrice = parseInt(document.getElementsByName('videography_price')[0].value) || 0;
+            var makeupPrice = parseInt(document.getElementsByName('makeup_price')[0].value) || 0;
+            var dressRentalPrice = parseInt(document.getElementsByName('dress_rental_price')[0].value) || 0;
+            var weddingCelebrationPrice = parseInt(document.getElementsByName('wedding_celebration_price')[0].value) || 0;
+            var extraFilmPrice = parseInt(document.getElementsByName('extra_film_price')[0].value) || 0;
 
-            var totalPrice = weddingDressPrice + photographyPrice + videographyPrice + makeupPrice + dressRentalPrice + weddingCelebrationPrice;
-            document.getElementsByName('total_price')[0].value = totalPrice.toFixed(2);
+            var totalPrice = weddingDressPrice + photographyPrice + videographyPrice + makeupPrice + dressRentalPrice + weddingCelebrationPrice + extraFilmPrice;
+            document.getElementsByName('total_price')[0].value = totalPrice;
+        }
+
+        // 计算编辑订单总价格
+        function calculateEditTotalPrice() {
+            var weddingDressPrice = parseInt(document.getElementById('edit_wedding_dress_price').value.replace(/[￥,]/g, '')) || 0;
+            var photographyPrice = parseInt(document.getElementById('edit_photography_price').value.replace(/[￥,]/g, '')) || 0;
+            var videographyPrice = parseInt(document.getElementById('edit_videography_price').value.replace(/[￥,]/g, '')) || 0;
+            var makeupPrice = parseInt(document.getElementById('edit_makeup_price').value.replace(/[￥,]/g, '')) || 0;
+            var dressRentalPrice = parseInt(document.getElementById('edit_dress_rental_price').value.replace(/[￥,]/g, '')) || 0;
+            var weddingCelebrationPrice = parseInt(document.getElementById('edit_wedding_celebration_price').value.replace(/[￥,]/g, '')) || 0;
+            var extraFilmPrice = parseInt(document.getElementById('edit_extra_film_price').value) || 0;
+
+            var totalPrice = weddingDressPrice + photographyPrice + videographyPrice + makeupPrice + dressRentalPrice + weddingCelebrationPrice + extraFilmPrice;
+            document.getElementById('edit_total_price').value = totalPrice;
         }
 
         // 提交表单
@@ -1113,13 +1798,15 @@
                     document.getElementById('edit_groom_phone').value = order.groom_phone;
                     document.getElementById('edit_bride_phone').value = order.bride_phone;
 
-                    document.getElementById('edit_wedding_dress_price').value = order.wedding_dress_price;
-                    document.getElementById('edit_photography_price').value = order.photography_price;
-                    document.getElementById('edit_videography_price').value = order.videography_price;
-                    document.getElementById('edit_makeup_price').value = order.makeup_price;
-                    document.getElementById('edit_dress_rental_price').value = order.dress_rental_price;
-                    document.getElementById('edit_wedding_celebration_price').value = order.wedding_celebration_price;
-                    document.getElementById('edit_total_price').value = order.total_price;
+                    // 格式化价格显示为人民币样式
+                    document.getElementById('edit_wedding_dress_price').value = formatPrice(order.wedding_dress_price);
+                    document.getElementById('edit_photography_price').value = formatPrice(order.photography_price);
+                    document.getElementById('edit_videography_price').value = formatPrice(order.videography_price);
+                    document.getElementById('edit_makeup_price').value = formatPrice(order.makeup_price);
+                    document.getElementById('edit_dress_rental_price').value = formatPrice(order.dress_rental_price);
+                    document.getElementById('edit_wedding_celebration_price').value = formatPrice(order.wedding_celebration_price);
+                    document.getElementById('edit_extra_film_price').value = order.extra_film_price || 0;
+                    document.getElementById('edit_total_price').value = formatPrice(order.total_price);
 
                     // 日期字段格式化
                     document.getElementById('edit_order_time').value = formatDate(order.order_time);
@@ -1134,6 +1821,7 @@
                     document.getElementById('edit_sales_consultant').value = order.sales_consultant;
                     document.getElementById('edit_photographer').value = order.photographer;
                     document.getElementById('edit_makeup_artist').value = order.makeup_artist;
+                    document.getElementById('edit_remark').value = order.remark || '';
                 } else {
                     alert('获取订单数据失败：' + data.message);
                 }
@@ -1175,16 +1863,16 @@
             var choosePictureTime = document.getElementById('edit_choosePicture_time').value;
             var confirmPictureTime = document.getElementById('edit_confirmPicture_time').value;
 
-            // 选片时间必须大于等于拍摄时间
+            // 选片时间必须大于等于拍摄时间（允许相等）
             if (choosePictureTime && shootTime && choosePictureTime < shootTime) {
                 alert('选片时间必须大于或等于拍摄时间！');
                 document.getElementById('edit_choosePicture_time').value = shootTime;
                 return false;
             }
 
-            // 看精修时间必须大于选片时间
-            if (confirmPictureTime && choosePictureTime && confirmPictureTime <= choosePictureTime) {
-                alert('看精修时间必须大于选片时间！');
+            // 看精修时间必须大于等于选片时间（允许相等）
+            if (confirmPictureTime && choosePictureTime && confirmPictureTime < choosePictureTime) {
+                alert('看精修时间必须大于或等于选片时间！');
                 document.getElementById('edit_confirmPicture_time').value = choosePictureTime;
                 return false;
             }
@@ -1228,8 +1916,118 @@
             if (e.key === 'Escape') {
                 closeAddOrderModal();
                 closeEditOrderModal();
+                closeDatePicker();
             }
         });
+
+        // 日期范围选择器
+        let currentDatePicker = null;
+
+        function showDatePicker(input) {
+            // 关闭已打开的日期选择器
+            closeDatePicker();
+
+            currentDatePicker = input;
+            const startFieldId = input.getAttribute('data-start-field');
+            const endFieldId = input.getAttribute('data-end-field');
+            const startDate = document.getElementById(startFieldId).value;
+            const endDate = document.getElementById(endFieldId).value;
+
+            // 创建日期选择器弹窗
+            const picker = document.createElement('div');
+            picker.id = 'datePickerPopup';
+            picker.className = 'date-picker-popup active';
+
+            const labelMap = {
+                'shoot': '拍摄时间',
+                'order': '订单时间',
+                'photo': '跟拍时间',
+                'makeup': '跟妆时间'
+            };
+            let pickerLabel = '时间范围';
+            for (let key in labelMap) {
+                if (startFieldId.includes(key)) {
+                    pickerLabel = labelMap[key];
+                    break;
+                }
+            }
+
+            picker.innerHTML = `
+                <div class="date-picker-header">
+                    <h4>选择${pickerLabel}</h4>
+                    <button type="button" class="date-picker-close" onclick="closeDatePicker()">&times;</button>
+                </div>
+                <div class="date-picker-body">
+                    <div class="date-input-group">
+                        <label>开始日期</label>
+                        <input type="date" id="picker_start" value="${startDate}">
+                    </div>
+                    <div class="date-input-group">
+                        <label>结束日期</label>
+                        <input type="date" id="picker_end" value="${endDate}">
+                    </div>
+                </div>
+                <div class="date-picker-footer">
+                    <button type="button" class="btn btn-clear" onclick="clearDateRange()">清空</button>
+                    <button type="button" class="btn btn-reset" onclick="closeDatePicker()">取消</button>
+                    <button type="button" class="btn btn-search" onclick="applyDateRange()">确定</button>
+                </div>
+            `;
+
+            document.body.appendChild(picker);
+
+            // 定位弹窗
+            const rect = input.getBoundingClientRect();
+            picker.style.top = (window.scrollY + rect.bottom + 5) + 'px';
+            picker.style.left = (window.scrollX + rect.left) + 'px';
+        }
+
+        function closeDatePicker() {
+            const picker = document.getElementById('datePickerPopup');
+            if (picker) {
+                picker.remove();
+            }
+            currentDatePicker = null;
+        }
+
+        function applyDateRange() {
+            if (!currentDatePicker) return;
+
+            const startDate = document.getElementById('picker_start').value;
+            const endDate = document.getElementById('picker_end').value;
+            const startFieldId = currentDatePicker.getAttribute('data-start-field');
+            const endFieldId = currentDatePicker.getAttribute('data-end-field');
+
+            // 更新隐藏字段
+            document.getElementById(startFieldId).value = startDate;
+            document.getElementById(endFieldId).value = endDate;
+
+            // 更新显示文本
+            if (startDate && endDate) {
+                currentDatePicker.value = startDate + ' 至 ' + endDate;
+            } else if (startDate) {
+                currentDatePicker.value = startDate + ' 起';
+            } else if (endDate) {
+                currentDatePicker.value = '至 ' + endDate;
+            } else {
+                currentDatePicker.value = '';
+            }
+
+            closeDatePicker();
+        }
+
+        function clearDateRange() {
+            if (!currentDatePicker) return;
+
+            const startFieldId = currentDatePicker.getAttribute('data-start-field');
+            const endFieldId = currentDatePicker.getAttribute('data-end-field');
+
+            document.getElementById(startFieldId).value = '';
+            document.getElementById(endFieldId).value = '';
+            currentDatePicker.value = '';
+
+            closeDatePicker();
+        }
 
         // 加载侧边栏菜单
         async function loadUserMenus() {
@@ -1263,12 +2061,547 @@
 
         // 页面加载时加载菜单
         loadUserMenus();
+
+        // 重置搜索表单
+        function resetSearch() {
+            window.location.href = '{{ url_for("index") }}';
+        }
+
+        // 修改密码功能
+        function openChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.add('active');
+            document.getElementById('changePasswordForm').reset();
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.remove('active');
+        }
+
+        async function submitChangePassword() {
+            const oldPassword = document.getElementById('old_password').value;
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+
+            if (!oldPassword || !newPassword) {
+                alert('请填写原密码和新密码！');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                alert('两次输入的新密码不一致！');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                alert('新密码长度不能少于 6 位！');
+                return;
+            }
+
+            try {
+                const response = await fetch('/change_password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        old_password: oldPassword,
+                        new_password: newPassword
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(data.message);
+                    closeChangePasswordModal();
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                alert('修改失败：' + error.message);
+            }
+        }
     </script>
 
-<script>
-    function confirmDelete() {
-        return confirm("确认删除订单吗？");
-    }
-</script>
+    <!-- 修改密码弹窗 -->
+    <div class="modal-overlay" id="changePasswordModal" onclick="closeChangePasswordModal(event)">
+        <div class="modal-container" style="max-width: 400px;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);">
+                <h3>🔐 修改密码</h3>
+                <button class="modal-close" onclick="closeChangePasswordModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="changePasswordForm">
+                    <div class="form-group">
+                        <label>原密码 <span style="color:red">*</span></label>
+                        <input type="password" id="old_password" required placeholder="请输入原密码">
+                    </div>
+                    <div class="form-group">
+                        <label>新密码 <span style="color:red">*</span></label>
+                        <input type="password" id="new_password" required placeholder="请输入新密码（至少 6 位）">
+                    </div>
+                    <div class="form-group">
+                        <label>确认新密码 <span style="color:red">*</span></label>
+                        <input type="password" id="confirm_password" required placeholder="请再次输入新密码">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn modal-btn-secondary" onclick="closeChangePasswordModal()">取消</button>
+                <button type="button" class="modal-btn modal-btn-primary" onclick="submitChangePassword()" style="background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);">确认修改</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function confirmDelete() {
+            return confirm("确认删除订单吗？");
+        }
+
+        // 点击遮罩层关闭修改密码弹窗
+        function closeChangePasswordModalEvent(event) {
+            if (event.target === document.getElementById('changePasswordModal')) {
+                closeChangePasswordModal();
+            }
+        }
+
+        // ESC 关闭修改密码弹窗
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeChangePasswordModal();
+            }
+        });
+
+        // 打开订单详情弹窗
+        async function openViewOrderModal(orderId) {
+            try {
+                const response = await fetch('/get_order/' + orderId);
+                const data = await response.json();
+
+                if (data.success) {
+                    const order = data.order;
+
+                    // 填充新人信息
+                    document.getElementById('view_groom_name').textContent = order.groom_name || '-';
+                    document.getElementById('view_bride_name').textContent = order.bride_name || '-';
+                    document.getElementById('view_groom_phone').textContent = order.groom_phone || '-';
+                    document.getElementById('view_bride_phone').textContent = order.bride_phone || '-';
+
+                    // 填充服务价格
+                    document.getElementById('view_wedding_dress_price').textContent = formatPrice(order.wedding_dress_price);
+                    document.getElementById('view_makeup_price').textContent = formatPrice(order.makeup_price);
+                    document.getElementById('view_photography_price').textContent = formatPrice(order.photography_price);
+                    document.getElementById('view_videography_price').textContent = formatPrice(order.videography_price);
+                    document.getElementById('view_dress_rental_price').textContent = formatPrice(order.dress_rental_price);
+                    document.getElementById('view_wedding_celebration_price').textContent = formatPrice(order.wedding_celebration_price);
+                    document.getElementById('view_extra_film_price').textContent = formatPrice(order.extra_film_price);
+                    document.getElementById('view_total_price').textContent = formatPrice(order.total_price);
+
+                    // 填充时间安排
+                    document.getElementById('view_order_time').textContent = formatDateTime(order.order_time);
+                    document.getElementById('view_shoot_time').textContent = formatDateTime(order.shoot_time);
+                    document.getElementById('view_choosePicture_time').textContent = formatDateTime(order.choosePicture_time);
+                    document.getElementById('view_confirmPicture_time').textContent = formatDateTime(order.confirmPicture_time);
+
+                    // 填充订单信息
+                    document.getElementById('view_order_status').textContent = order.order_status || '-';
+                    document.getElementById('view_sales_consultant').textContent = order.sales_consultant || '-';
+                    document.getElementById('view_photographer').textContent = order.photographer || '-';
+                    document.getElementById('view_makeup_artist').textContent = order.makeup_artist || '-';
+                    document.getElementById('view_created_by').textContent = order.created_by || '-';
+                    document.getElementById('view_created_time').textContent = formatDateTime(order.created_time);
+
+                    // 填充备注
+                    const remarkElement = document.getElementById('view_remark');
+                    if (order.remark && order.remark.trim()) {
+                        remarkElement.textContent = order.remark;
+                        remarkElement.classList.remove('empty');
+                    } else {
+                        remarkElement.textContent = '无备注';
+                        remarkElement.classList.add('empty');
+                    }
+
+                    document.getElementById('viewOrderModal').classList.add('active');
+                } else {
+                    alert('获取订单详情失败：' + data.message);
+                }
+            } catch (error) {
+                alert('获取订单详情失败：' + error.message);
+            }
+        }
+
+        // 关闭订单详情弹窗
+        function closeViewOrderModal() {
+            document.getElementById('viewOrderModal').classList.remove('active');
+        }
+
+        // 点击遮罩层关闭订单详情弹窗
+        function closeViewOrderModalEvent(event) {
+            if (event.target === document.getElementById('viewOrderModal')) {
+                closeViewOrderModal();
+            }
+        }
+
+        // ESC 关闭订单详情弹窗
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeViewOrderModal();
+            }
+        });
+
+        // 打印订单详情
+        function printOrderDetail() {
+            // 先关闭详情弹窗，避免打印时产生冲突
+            closeViewOrderModal();
+
+            const printContainer = document.getElementById('printContainer');
+
+            // 填充打印内容
+            document.getElementById('print_groom_name').textContent = document.getElementById('view_groom_name').textContent;
+            document.getElementById('print_bride_name').textContent = document.getElementById('view_bride_name').textContent;
+            document.getElementById('print_groom_phone').textContent = document.getElementById('view_groom_phone').textContent;
+            document.getElementById('print_bride_phone').textContent = document.getElementById('view_bride_phone').textContent;
+
+            document.getElementById('print_wedding_dress_price').textContent = document.getElementById('view_wedding_dress_price').textContent;
+            document.getElementById('print_photography_price').textContent = document.getElementById('view_photography_price').textContent;
+            document.getElementById('print_makeup_price').textContent = document.getElementById('view_makeup_price').textContent;
+            document.getElementById('print_videography_price').textContent = document.getElementById('view_videography_price').textContent;
+            document.getElementById('print_dress_rental_price').textContent = document.getElementById('view_dress_rental_price').textContent;
+            document.getElementById('print_wedding_celebration_price').textContent = document.getElementById('view_wedding_celebration_price').textContent;
+            document.getElementById('print_extra_film_price').textContent = document.getElementById('view_extra_film_price').textContent;
+            document.getElementById('print_total_price').textContent = document.getElementById('view_total_price').textContent;
+
+            document.getElementById('print_order_time').textContent = document.getElementById('view_order_time').textContent;
+            document.getElementById('print_shoot_time').textContent = document.getElementById('view_shoot_time').textContent;
+            document.getElementById('print_choosePicture_time').textContent = document.getElementById('view_choosePicture_time').textContent;
+            document.getElementById('print_confirmPicture_time').textContent = document.getElementById('view_confirmPicture_time').textContent;
+
+            document.getElementById('print_order_status').textContent = document.getElementById('view_order_status').textContent;
+            document.getElementById('print_sales_consultant').textContent = document.getElementById('view_sales_consultant').textContent;
+            document.getElementById('print_photographer').textContent = document.getElementById('view_photographer').textContent;
+            document.getElementById('print_makeup_artist').textContent = document.getElementById('view_makeup_artist').textContent;
+            document.getElementById('print_created_by').textContent = document.getElementById('view_created_by').textContent;
+            document.getElementById('print_created_time').textContent = document.getElementById('view_created_time').textContent;
+
+            const remarkContent = document.getElementById('view_remark').textContent;
+            const printRemarkElement = document.getElementById('print_remark');
+            printRemarkElement.textContent = remarkContent;
+            if (remarkContent === '无备注' || remarkContent.trim() === '') {
+                printRemarkElement.classList.add('empty');
+            } else {
+                printRemarkElement.classList.remove('empty');
+            }
+
+            // 设置打印日期
+            const now = new Date();
+            document.getElementById('printDateTime').textContent = '打印时间：' + now.toLocaleString('zh-CN');
+
+            // 延迟一下再打印，确保 DOM 更新完成
+            setTimeout(function() {
+                window.print();
+            }, 100);
+        }
+    </script>
+
+    <!-- 订单详情弹窗 -->
+    <div class="modal-overlay" id="viewOrderModal" onclick="closeViewOrderModalEvent(event)">
+        <div class="modal-container" style="max-width: 900px;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%); display: flex; justify-content: space-between; align-items: center;">
+                <h3>📄 订单详情</h3>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="print-btn" onclick="printOrderDetail()">🖨️ 打印</button>
+                    <button class="modal-close" onclick="closeViewOrderModal()">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <!-- 新人信息 -->
+                <div class="detail-section">
+                    <div class="detail-section-header">新人信息</div>
+                    <div class="detail-section-content">
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">新郎姓名</span>
+                                <span class="detail-value" id="view_groom_name">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">新娘姓名</span>
+                                <span class="detail-value" id="view_bride_name">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">新郎电话</span>
+                                <span class="detail-value" id="view_groom_phone">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">新娘电话</span>
+                                <span class="detail-value" id="view_bride_phone">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 服务价格 -->
+                <div class="detail-section">
+                    <div class="detail-section-header">服务价格</div>
+                    <div class="detail-section-content">
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">婚纱照价格</span>
+                                <span class="detail-value price-value" id="view_wedding_dress_price">￥0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">跟拍价格</span>
+                                <span class="detail-value price-value" id="view_photography_price">￥0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">跟妆价格</span>
+                                <span class="detail-value price-value" id="view_makeup_price">￥0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">摄像价格</span>
+                                <span class="detail-value price-value" id="view_videography_price">￥0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">租礼服价格</span>
+                                <span class="detail-value price-value" id="view_dress_rental_price">￥0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">婚庆价格</span>
+                                <span class="detail-value price-value" id="view_wedding_celebration_price">￥0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">加片金额</span>
+                                <span class="detail-value price-value" id="view_extra_film_price">￥0</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">总价格</span>
+                                <span class="detail-value total-value" id="view_total_price">￥0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 时间安排 -->
+                <div class="detail-section">
+                    <div class="detail-section-header">时间安排</div>
+                    <div class="detail-section-content">
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">订单时间</span>
+                                <span class="detail-value" id="view_order_time">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">拍摄时间</span>
+                                <span class="detail-value" id="view_shoot_time">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">选片时间</span>
+                                <span class="detail-value" id="view_choosePicture_time">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">看精修时间</span>
+                                <span class="detail-value" id="view_confirmPicture_time">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 订单信息 -->
+                <div class="detail-section">
+                    <div class="detail-section-header">订单信息</div>
+                    <div class="detail-section-content">
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">订单状态</span>
+                                <span class="detail-value" id="view_order_status">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">销售顾问</span>
+                                <span class="detail-value" id="view_sales_consultant">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">摄影师</span>
+                                <span class="detail-value" id="view_photographer">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">化妆师</span>
+                                <span class="detail-value" id="view_makeup_artist">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">创建人</span>
+                                <span class="detail-value" id="view_created_by">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">创建时间</span>
+                                <span class="detail-value" id="view_created_time">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 备注 -->
+                <div class="detail-section">
+                    <div class="detail-section-header">备注</div>
+                    <div class="detail-section-content">
+                        <div class="detail-remark empty" id="view_remark">无备注</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn modal-btn-secondary" onclick="closeViewOrderModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 打印专用容器（隐藏） -->
+    <div id="printContainer" class="print-only">
+        <div class="print-header">
+            <h1>大麦摄影管理系统 - 订单详情</h1>
+            <div class="print-date" id="printDateTime"></div>
+        </div>
+
+        <!-- 新人信息 -->
+        <div class="print-section">
+            <div class="print-section-header">新人信息</div>
+            <div class="print-section-content">
+                <div class="print-grid">
+                    <div class="print-item">
+                        <span class="print-label">新郎姓名</span>
+                        <span class="print-value" id="print_groom_name">-</span>
+                    </div>
+                    <div class="print-item">
+                        <span class="print-label">新娘姓名</span>
+                        <span class="print-value" id="print_bride_name">-</span>
+                    </div>
+                    <div class="print-item">
+                        <span class="print-label">新郎电话</span>
+                        <span class="print-value" id="print_groom_phone">-</span>
+                    </div>
+                    <div class="print-item">
+                        <span class="print-label">新娘电话</span>
+                        <span class="print-value" id="print_bride_phone">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 服务价格 -->
+        <div class="print-section">
+            <div class="print-section-header">服务价格</div>
+            <div class="print-section-content">
+                <div class="print-grid grid-4">
+                    <div class="print-item">
+                        <span class="print-label">婚纱照价格</span>
+                        <span class="print-value price-value" id="print_wedding_dress_price">￥0</span>
+                    </div>
+                    <div class="print-item">
+                        <span class="print-label">跟拍价格</span>
+                        <span class="print-value price-value" id="print_photography_price">￥0</span>
+                    </div>
+                    <div class="print-item">
+                        <span class="print-label">跟妆价格</span>
+                        <span class="print-value price-value" id="print_makeup_price">￥0</span>
+                    </div>
+                    <div class="print-item">
+                        <span class="print-label">摄像价格</span>
+                        <span class="print-value price-value" id="print_videography_price">￥0</span>
+                    </div>
+                    <div class="print-item">
+                        <span class="print-label">租礼服价格</span>
+                        <span class="print-value price-value" id="print_dress_rental_price">￥0</span>
+                    </div>
+                    <div class="print-item">
+                        <span class="print-label">婚庆价格</span>
+                        <span class="print-value price-value" id="print_wedding_celebration_price">￥0</span>
+                    </div>
+                    <div class="print-item">
+                        <span class="print-label">加片金额</span>
+                        <span class="print-value price-value" id="print_extra_film_price">￥0</span>
+                    </div>
+                    <div class="print-item">
+                        <span class="print-label">总价格</span>
+                        <span class="print-value total-value" id="print_total_price">￥0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 时间安排 -->
+        <div class="print-section">
+            <div class="print-section-header">时间安排</div>
+            <div class="print-section-content">
+                <div class="print-grid">
+                    <div class="print-item">
+                        <span class="print-label">订单时间</span>
+                        <span class="print-value" id="print_order_time">-</span>
+                    </div>
+                    <div class="print-item">
+                        <span class="print-label">拍摄时间</span>
+                        <span class="print-value" id="print_shoot_time">-</span>
+                    </div>
+                    <div class="print-item">
+                        <span class="print-label">选片时间</span>
+                        <span class="print-value" id="print_choosePicture_time">-</span>
+                    </div>
+                    <div class="print-item">
+                        <span class="print-label">看精修时间</span>
+                        <span class="print-value" id="print_confirmPicture_time">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 订单信息 -->
+        <div class="print-section">
+            <div class="print-section-header">订单信息</div>
+            <div class="print-section-content">
+                <div class="print-grid grid-3">
+                    <div class="print-item">
+                        <span class="print-label">订单状态</span>
+                        <span class="print-value" id="print_order_status">-</span>
+                    </div>
+                    <div class="print-item">
+                        <span class="print-label">销售顾问</span>
+                        <span class="print-value" id="print_sales_consultant">-</span>
+                    </div>
+                    <div class="print-item">
+                        <span class="print-label">摄影师</span>
+                        <span class="print-value" id="print_photographer">-</span>
+                    </div>
+                    <div class="print-item">
+                        <span class="print-label">化妆师</span>
+                        <span class="print-value" id="print_makeup_artist">-</span>
+                    </div>
+                    <div class="print-item">
+                        <span class="print-label">创建人</span>
+                        <span class="print-value" id="print_created_by">-</span>
+                    </div>
+                    <div class="print-item">
+                        <span class="print-label">创建时间</span>
+                        <span class="print-value" id="print_created_time">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 备注 -->
+        <div class="print-section">
+            <div class="print-section-header">备注</div>
+            <div class="print-section-content">
+                <div class="print-remark empty" id="print_remark">无备注</div>
+            </div>
+        </div>
+
+        <!-- 打印页脚 -->
+        <div class="print-footer">
+            <div class="print-signature">
+                <div>客户签字：</div>
+                <div class="print-signature-line"></div>
+            </div>
+            <div class="print-signature">
+                <div>销售顾问签字：</div>
+                <div class="print-signature-line"></div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

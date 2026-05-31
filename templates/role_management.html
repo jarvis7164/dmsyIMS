@@ -172,6 +172,20 @@
             background-color: #f1f1f1;
         }
 
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
         .action-btn {
             margin: 0 5px;
             padding: 6px 12px;
@@ -514,9 +528,11 @@
                         <td>{{ role.description or '-' }}</td>
                         <td>{{ role.created_time.strftime('%Y-%m-%d %H:%M') if role.created_time else '-' }}</td>
                         <td>
-                            <button onclick="openEditModal({{ role.id }})" class="action-btn edit-btn">编辑</button>
                             {% if role.role_code != 'ADMIN' %}
+                            <button onclick="openEditModal({{ role.id }})" class="action-btn edit-btn">编辑</button>
                             <button onclick="deleteRole({{ role.id }})" class="action-btn delete-btn">删除</button>
+                            {% else %}
+                            <span style="color: #999;">超级管理员</span>
                             {% endif %}
                         </td>
                     </tr>

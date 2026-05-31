@@ -106,29 +106,31 @@
         .content-card {
             background-color: white;
             border-radius: 8px;
-            padding: 30px;
+            padding: 20px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 12px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             color: #333;
             font-weight: bold;
+            font-size: 13px;
         }
 
-        .form-group input {
+        .form-group input,
+        .form-group select {
             width: 100%;
-            padding: 10px;
+            padding: 6px 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .form-group input:focus {
@@ -240,30 +242,40 @@
                         <label for="username">用户名 *</label>
                         <input type="text" id="username" name="username" required>
                     </div>
-                </div>
-
-                <div class="form-row">
                     <div class="form-group">
                         <label for="password">密码 *</label>
                         <input type="password" id="password" name="password" required>
                     </div>
+                </div>
+
+                <div class="form-row">
                     <div class="form-group">
                         <label for="position">岗位</label>
-                        <input type="text" id="position" name="position">
+                        <select id="position" name="position">
+                            <option value="">请选择岗位</option>
+                            <option value="经理">经理</option>
+                            <option value="店长">店长</option>
+                            <option value="门市">门市</option>
+                            <option value="摄影师">摄影师</option>
+                            <option value="化妆师">化妆师</option>
+                            <option value="摄影助理">摄影助理</option>
+                            <option value="化妆助理">化妆助理</option>
+                            <option value="礼服师">礼服师</option>
+                            <option value="修图师">修图师</option>
+                            <option value="客服">客服</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">电话</label>
+                        <input type="text" id="phone" name="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="address">地址</label>
+                        <input type="text" id="address" name="address">
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="phone">电话</label>
-                    <input type="text" id="phone" name="phone">
-                </div>
-
-                <div class="form-group">
-                    <label for="address">地址</label>
-                    <input type="text" id="address" name="address">
-                </div>
-
-                <h3 style="margin: 25px 0 15px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">薪资信息</h3>
+                <h3 style="margin: 15px 0 10px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 8px; font-size: 14px;">薪资信息</h3>
 
                 <div class="form-row">
                     <div class="form-group">
@@ -271,19 +283,46 @@
                         <input type="number" step="0.01" id="basic_salary" name="basic_salary" value="0">
                     </div>
                     <div class="form-group">
+                        <label for="total_rate">总提点 (%)</label>
+                        <input type="number" step="0.01" id="total_rate" name="total_rate" value="0">
+                    </div>
+                    <div class="form-group">
                         <label for="pre_sales_rate">前期提点 (%)</label>
                         <input type="number" step="0.01" id="pre_sales_rate" name="pre_sales_rate" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="post_sales_rate">后期提点 (%)</label>
+                        <input type="number" step="0.01" id="post_sales_rate" name="post_sales_rate" value="0">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="post_sales_rate">后期提点 (%)</label>
-                        <input type="number" step="0.01" id="post_sales_rate" name="post_sales_rate" value="0">
+                        <label for="base_salary">基本薪资</label>
+                        <input type="number" step="0.01" id="base_salary" name="base_salary" value="0">
                     </div>
                     <div class="form-group">
                         <label for="guaranteed_salary">保底薪资</label>
                         <input type="number" step="0.01" id="guaranteed_salary" name="guaranteed_salary" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="photo_price">修片单价</label>
+                        <input type="number" step="0.01" id="photo_price" name="photo_price" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="makeup_subsidy">化妆品补贴</label>
+                        <input type="number" step="0.01" id="makeup_subsidy" name="makeup_subsidy" value="0">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="material_subsidy">耗材补贴</label>
+                        <input type="number" step="0.01" id="material_subsidy" name="material_subsidy" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="other_subsidy">其他补贴</label>
+                        <input type="number" step="0.01" id="other_subsidy" name="other_subsidy" value="0">
                     </div>
                 </div>
 

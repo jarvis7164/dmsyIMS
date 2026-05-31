@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  dmsy-ims:
+    build: .
+    container_name: dmsy-ims
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      # 持久化数据库文件
+      - ./instance:/app/instance
+      # 持久化日志
+      - ./logs:/app/logs
+    environment:
+      - SECRET_KEY=a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456
+      - DATABASE_URI=sqlite:///instance/company_data.db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/login"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d//**)",
+      "Bash(python -c \":*)",
+      "Bash(python:*)",
+      "Bash(curl:*)",
+      "Bash(node:*)",
+      "Bash(taskkill:*)",
+      "Bash(start python:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(pip install:*)",
+      "Bash(ls -la *.txt *.md 2nul)",
+      "Bash(dir *.txt *.md)"
+    ]
+  }
+}

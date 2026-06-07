@@ -108,6 +108,21 @@ user_role = db.Table('user_role',
 )
 
 
+# 客资管理表
+class CustomerLead(db.Model):
+    __tablename__ = 'customer_lead'
+    id = db.Column(db.Integer, primary_key=True)
+    customer_name = db.Column(db.String(50), nullable=False)  # 客户姓名
+    phone = db.Column(db.String(20))  # 电话
+    assigned_sales = db.Column(db.String(20))  # 分配的销售人员（用户名）
+    status = db.Column(db.String(20), default='待跟踪')  # 状态：待跟踪、跟踪中、大麦已定、别家已定、无效客资
+    remark = db.Column(db.String(300))  # 备注
+    created_by = db.Column(db.String(20))  # 创建人
+    created_time = db.Column(db.DateTime, default=datetime.utcnow().replace(microsecond=0))  # 创建时间
+    updated_time = db.Column(db.DateTime, default=datetime.utcnow().replace(microsecond=0),
+                         onupdate=datetime.utcnow().replace(microsecond=0))  # 更新时间
+
+
 # 工资表
 class Salary(db.Model):
     __tablename__ = 'salary'

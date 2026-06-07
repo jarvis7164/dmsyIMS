@@ -40,8 +40,8 @@ NEW_COMMIT=$(git rev-parse HEAD)
 log "新版本: $NEW_COMMIT"
 
 # 重新构建并启动
-log "🔨 正在重新构建 Docker 容器..."
-docker-compose up -d --build
+log "🔨 正在启动 Docker 容器..."
+docker-compose up -d
 
 # 等待服务启动
 log "⏳ 等待服务启动..."
@@ -72,7 +72,7 @@ if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
     docker-compose logs --tail=20 | tee -a "$LOG_FILE"
     log "尝试回滚..."
     git checkout $CURRENT_COMMIT
-    docker-compose up -d --build
+    docker-compose up -d
     exit 1
 fi
 

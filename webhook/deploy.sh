@@ -33,7 +33,7 @@ docker-compose down || true
 
 # 拉取最新代码
 log "📥 正在拉取最新代码..."
-git pull origin main
+git pull origin master
 
 # 获取新版本
 NEW_COMMIT=$(git rev-parse HEAD)

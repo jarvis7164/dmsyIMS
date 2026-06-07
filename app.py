@@ -53,7 +53,7 @@ def login():
         password = request.form['password']
 
         # 验证用户
-        user = db.session.get(User, userid)
+        user = User.query.filter_by(username=userid).first()
 
         if user and check_password_hash(user.password, password):
             # 用户验证成功

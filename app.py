@@ -425,12 +425,13 @@ def add_user_page():
 
 
 # 添加用户
+DEFAULT_PASSWORD = 'dmsy@123'  # 默认密码
+
 @app.route('/add_user', methods=['POST'])
 def add_user():
     if 'userid' in session:
         userid = request.form['userid']
         username = request.form['username']
-        password = request.form['password']
         position = request.form.get('position', '')
         phone = request.form.get('phone', '')
         address = request.form.get('address', '')
@@ -455,11 +456,11 @@ def add_user():
         if existing_user:
             return jsonify({'success': False, 'message': '用户 ID 已存在！'}), 400
 
-        # 创建用户对象并保存到数据库
+        # 创建用户对象并保存到数据库（使用默认密码）
         new_user = User(
             userid=userid,
             username=username,
-            password=generate_password_hash(password),
+            password=generate_password_hash(DEFAULT_PASSWORD),
             position=position,
             phone=phone,
             address=address,
@@ -478,7 +479,11 @@ def add_user():
         try:
             db.session.add(new_user)
             db.session.commit()
-            return jsonify({'success': True, 'message': '用户添加成功！'}), 200
+            return jsonify({
+                'success': True, 
+                'message': '用户添加成功！',
+                'default_password': DEFAULT_PASSWORD
+            }), 200
         except Exception as e:
             db.session.rollback()
             return jsonify({'success': False, 'message': '用户添加失败：' + str(e)}), 500
@@ -531,7 +536,8 @@ def get_user_roles(userid):
     if not user:
         return jsonify({'success': False, 'message': '用户不存在！'}), 404
 
-    all_roles = Role.query.all()
+    # 过滤掉超级管理员角色（role_code='ADMIN'）
+    all_roles = Role.query.filter(Role.role_code != 'ADMIN').all()
     user_role_ids = [role.id for role in user.roles]
 
     roles_data = []
@@ -1022,7 +1028,7 @@ def reset_password(userid):
         return jsonify({'success': False, 'message': '用户不存在！'}), 404
 
     # 重置为默认密码
-    default_password = 'dmsy123123'
+    default_password = 'dmsy@123'
     user.password = generate_password_hash(default_password)
 
     try:

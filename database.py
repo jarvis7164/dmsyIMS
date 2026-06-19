@@ -117,6 +117,14 @@ class CustomerLead(db.Model):
     assigned_sales = db.Column(db.String(20))  # 分配的销售人员（用户名）
     status = db.Column(db.String(20), default='待跟踪')  # 状态：待跟踪、跟踪中、大麦已定、别家已定、无效客资
     remark = db.Column(db.String(300))  # 备注
+    visit_time = db.Column(db.DateTime)  # 到店时间
+    lead_level = db.Column(db.String(20))  # 客资等级：A类、B类、C类
+    operations_staff = db.Column(db.String(20))  # 分配运营人员（用户名）
+    wedding_date = db.Column(db.DateTime)  # 婚期
+    channel = db.Column(db.String(50))  # 渠道
+    inviter = db.Column(db.String(20))  # 邀约人
+    is_ordered = db.Column(db.String(10), default='否')  # 是否订单：是、否
+    is_visited = db.Column(db.String(10), default='否')  # 是否进店：是、否
     created_by = db.Column(db.String(20))  # 创建人
     created_time = db.Column(db.DateTime, default=datetime.utcnow().replace(microsecond=0))  # 创建时间
     updated_time = db.Column(db.DateTime, default=datetime.utcnow().replace(microsecond=0),

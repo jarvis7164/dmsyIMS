@@ -1407,6 +1407,8 @@ def customer_lead_management():
     per_page = 10
     start_date = request.args.get('start_date', '')
     end_date = request.args.get('end_date', '')
+    visit_start_date = request.args.get('visit_start_date', '')
+    visit_end_date = request.args.get('visit_end_date', '')
     sales_filter = request.args.get('sales', '')
     
     # 构建查询
@@ -1417,6 +1419,12 @@ def customer_lead_management():
         query = query.filter(db.func.date(CustomerLead.created_time) >= start_date)
     if end_date:
         query = query.filter(db.func.date(CustomerLead.created_time) <= end_date)
+    
+    # 到店时间筛选
+    if visit_start_date:
+        query = query.filter(db.func.date(CustomerLead.visit_time) >= visit_start_date)
+    if visit_end_date:
+        query = query.filter(db.func.date(CustomerLead.visit_time) <= visit_end_date)
     
     # 销售人员筛选
     if sales_filter:
@@ -1429,16 +1437,20 @@ def customer_lead_management():
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     leads = pagination.items
     
-    # 获取所有销售人员（用于筛选下拉框和分配）
+    # 获取所有销售人员和运营人员（用于筛选下拉框和分配）
     sales_staff = User.query.filter(or_(User.position == '门市', User.position == '经理')).all()
+    operations_staff = User.query.filter(User.position == '运营').all()
     
     return render_template('customer_lead_management.html', 
                          leads=leads, 
                          pagination=pagination,
                          start_date=start_date,
                          end_date=end_date,
+                         visit_start_date=visit_start_date,
+                         visit_end_date=visit_end_date,
                          sales_filter=sales_filter,
                          sales_staff=sales_staff,
+                         operations_staff=operations_staff,
                          format_datetime=format_datetime)
 
 
@@ -1456,19 +1468,23 @@ def api_add_customer_lead():
     customer_name = data.get('customer_name', '').strip()
     phone = data.get('phone', '').strip()
     assigned_sales = data.get('assigned_sales', '').strip()
+    operations_staff = data.get('operations_staff', '').strip()
+    channel = data.get('channel', '').strip()
+    wedding_date = data.get('wedding_date', '').strip()
+    visit_time = data.get('visit_time', '').strip()
+    inviter = data.get('inviter', '').strip()
+    is_ordered = data.get('is_ordered', '否').strip()
+    is_visited = data.get('is_visited', '否').strip()
+    lead_level = data.get('lead_level', '').strip()
     remark = data.get('remark', '').strip()
     
     # 验证必填字段
     if not customer_name:
         return jsonify({'success': False, 'message': '客户姓名不能为空！'}), 400
     
-    # 验证电话格式（如果提供）
-    if phone and not validate_phone(phone):
-        return jsonify({'success': False, 'message': '电话格式不正确！'}), 400
-    
     # 确定状态
     if assigned_sales:
-        status = '跟踪中'
+        status = '已分配'
     else:
         status = '待跟踪'
     
@@ -1477,6 +1493,15 @@ def api_add_customer_lead():
         customer_name=customer_name,
         phone=phone if phone else None,
         assigned_sales=assigned_sales if assigned_sales else None,
+        operations_staff=operations_staff if operations_staff else None,
+        channel=channel if channel else None,
+        # 婚期（日期格式：YYYY-MM-DD）
+    wedding_date=datetime.strptime(wedding_date, '%Y-%m-%d').date() if wedding_date else None,
+        visit_time=datetime.strptime(visit_time, '%Y-%m-%dT%H:%M') if visit_time else None,
+        inviter=inviter if inviter else None,
+        is_ordered=is_ordered,
+        is_visited=is_visited,
+        lead_level=lead_level if lead_level else None,
         status=status,
         remark=remark[:300] if remark else None,
         created_by=session['userid']
@@ -1510,6 +1535,14 @@ def api_get_customer_lead(lead_id):
         'customer_name': lead.customer_name,
         'phone': lead.phone or '',
         'assigned_sales': lead.assigned_sales or '',
+        'operations_staff': lead.operations_staff or '',
+        'channel': lead.channel or '',
+        'wedding_date': lead.wedding_date.strftime('%Y-%m-%d') if lead.wedding_date else '',
+        'visit_time': lead.visit_time.strftime('%Y-%m-%dT%H:%M') if lead.visit_time else '',
+        'inviter': lead.inviter or '',
+        'is_ordered': lead.is_ordered or '否',
+        'is_visited': lead.is_visited or '否',
+        'lead_level': lead.lead_level or '',
         'status': lead.status,
         'remark': lead.remark or '',
         'created_by': lead.created_by,
@@ -1538,6 +1571,14 @@ def api_edit_customer_lead(lead_id):
     customer_name = data.get('customer_name', '').strip()
     phone = data.get('phone', '').strip()
     assigned_sales = data.get('assigned_sales', '').strip()
+    operations_staff = data.get('operations_staff', '').strip()
+    channel = data.get('channel', '').strip()
+    wedding_date = data.get('wedding_date', '').strip()
+    visit_time = data.get('visit_time', '').strip()
+    inviter = data.get('inviter', '').strip()
+    is_ordered = data.get('is_ordered', '否').strip()
+    is_visited = data.get('is_visited', '否').strip()
+    lead_level = data.get('lead_level', '').strip()
     status = data.get('status', '').strip()
     remark = data.get('remark', '').strip()
     
@@ -1545,12 +1586,8 @@ def api_edit_customer_lead(lead_id):
     if not customer_name:
         return jsonify({'success': False, 'message': '客户姓名不能为空！'}), 400
     
-    # 验证电话格式（如果提供）
-    if phone and not validate_phone(phone):
-        return jsonify({'success': False, 'message': '电话格式不正确！'}), 400
-    
     # 验证状态
-    valid_statuses = ['待跟踪', '跟踪中', '大麦已定', '别家已定', '无效客资']
+    valid_statuses = ['待跟踪', '已分配', '大麦已定', '别家已定', '无效客资']
     if status and status not in valid_statuses:
         return jsonify({'success': False, 'message': '无效的状态值！'}), 400
     
@@ -1558,6 +1595,14 @@ def api_edit_customer_lead(lead_id):
     lead.customer_name = customer_name
     lead.phone = phone if phone else None
     lead.assigned_sales = assigned_sales if assigned_sales else None
+    lead.operations_staff = operations_staff if operations_staff else None
+    lead.channel = channel if channel else None
+    lead.wedding_date = datetime.strptime(wedding_date, '%Y-%m-%d').date() if wedding_date else None
+    lead.visit_time = datetime.strptime(visit_time, '%Y-%m-%dT%H:%M') if visit_time else None
+    lead.inviter = inviter if inviter else None
+    lead.is_ordered = is_ordered
+    lead.is_visited = is_visited
+    lead.lead_level = lead_level if lead_level else None
     lead.remark = remark[:300] if remark else None
     
     # 如果提供了状态，使用提供的状态；否则根据销售人员自动设置
@@ -1567,7 +1612,7 @@ def api_edit_customer_lead(lead_id):
         # 自动设置状态
         if lead.assigned_sales:
             if lead.status == '待跟踪':
-                lead.status = '跟踪中'
+                lead.status = '已分配'
         else:
             lead.status = '待跟踪'
     

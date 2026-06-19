@@ -27,9 +27,9 @@ log "==========================================="
 CURRENT_COMMIT=$(git rev-parse HEAD)
 log "当前版本: $CURRENT_COMMIT"
 
-# 停止当前服务
+# 停止当前服务（保留镜像）
 log "📦 停止当前服务..."
-docker-compose down || true
+docker-compose stop || true
 
 # 拉取最新代码
 log "📥 正在拉取最新代码..."
@@ -40,8 +40,8 @@ NEW_COMMIT=$(git rev-parse HEAD)
 log "新版本: $NEW_COMMIT"
 
 # 重新构建并启动
-log "🔨 正在启动 Docker 容器..."
-docker-compose up -d
+log "🔨 正在构建 Docker 镜像..."
+docker-compose up -d --build
 
 # 等待服务启动
 log "⏳ 等待服务启动..."
@@ -70,9 +70,8 @@ if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
     log "❌ 健康检查失败！"
     log "📋 最近日志："
     docker-compose logs --tail=20 | tee -a "$LOG_FILE"
-    log "尝试回滚..."
-    git checkout $CURRENT_COMMIT
-    docker-compose up -d
+    # 不要回滚或删除容器，保持现状供排查
+    log "⚠️ 容器保持运行状态，请检查日志排查问题"
     exit 1
 fi
 
